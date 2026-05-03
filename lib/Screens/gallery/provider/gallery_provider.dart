@@ -4,15 +4,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-final galleryProvider = FutureProvider<List<File>>((ref) async {
+final galleryProvider = StreamProvider<List<File>>((ref) async* {
   final dir = await getApplicationDocumentsDirectory();
-  final files = dir
-      .listSync()
-      .whereType<File>()
-      .where((f) => f.path.contains('snapcraft_') && f.path.endsWith('.jpg'))
-      .toList();
-  files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-  return files;
+
+  List<File> getFiles() {
+    final files = dir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.contains('snapcraft_') && f.path.endsWith('.jpg'))
+        .toList();
+    files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    return files;
+  }
+
+  // Yield initial list of files
+  yield getFiles();
+
+  // Listen to directory changes for real-time updates
+  await for (final _ in dir.watch()) {
+    yield getFiles();
+  }
 });
 
 class CollageLayout {

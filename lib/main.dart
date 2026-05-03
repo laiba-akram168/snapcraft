@@ -17,10 +17,9 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Keep native splash visible while initializing
+
   FlutterNativeSplash.preserve(widgetsBinding: WidgetsBinding.instance);
-  
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

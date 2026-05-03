@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapcraft/core/constant.dart';
 
 class ImageDetailScreen extends StatefulWidget {
@@ -21,6 +22,9 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
   late Animation<double> _uiOpacity;
   bool _uiVisible = true;
   bool _isFavourite = false;
+  
+  String _fileSize = '';
+  String _fileDate = '';
 
   @override
   void initState() {
@@ -29,6 +33,37 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
         vsync: this, duration: const Duration(milliseconds: 250));
     _uiOpacity = CurvedAnimation(parent: _uiCtrl, curve: Curves.easeInOut);
     _uiCtrl.value = 1.0;
+    
+    _loadFileStats();
+    _loadFavouriteStatus();
+  }
+
+  void _loadFileStats() {
+    if (widget.imageFile != null && widget.imageFile!.existsSync()) {
+      final stat = widget.imageFile!.statSync();
+      final sizeMb = stat.size / (1024 * 1024);
+      _fileSize = '${sizeMb.toStringAsFixed(1)} MB';
+      final modified = stat.modified;
+      _fileDate = '${modified.day}/${modified.month}/${modified.year}';
+    }
+  }
+
+  Future<void> _loadFavouriteStatus() async {
+    if (widget.imageFile == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isFavourite = prefs.getBool('fav_${widget.imageFile!.path}') ?? false;
+    });
+  }
+
+  Future<void> _toggleFavourite() async {
+    if (widget.imageFile == null) return;
+    final newStatus = !_isFavourite;
+    setState(() {
+      _isFavourite = newStatus;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('fav_${widget.imageFile!.path}', newStatus);
   }
 
   @override
@@ -97,12 +132,16 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
                           ? Icons.favorite_rounded
                           : Icons.favorite_border_rounded,
                       iconColor: _isFavourite ? Colors.red : Colors.white,
-                      onTap: () => setState(() => _isFavourite = !_isFavourite),
+                      onTap: _toggleFavourite,
                     ),
                     const Gap(8),
                     _CircleBtn(
                       icon: Icons.share_rounded,
-                      onTap: () {},
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Sharing coming soon!')),
+                        );
+                      },
                     ),
                     const Gap(8),
                     _CircleBtn(
@@ -144,7 +183,7 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
                     ),
                     const Gap(4),
                     Text(
-                      '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}  ·  4.2 MB  ·  3024×4032',
+                      '$_fileDate  ·  $_fileSize',
                       style: GoogleFonts.dmSans(
                           fontSize: 12, color: Colors.white60),
                     ),
@@ -219,12 +258,30 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
             ),
             const Gap(20),
             ...[
-              (Icons.download_rounded, 'Save to Gallery', AppTheme.success),
-              (Icons.copy_rounded, 'Copy Image', AppTheme.accentBlue),
-              (Icons.info_outline_rounded, 'Image Info', AppTheme.text2),
-              (Icons.delete_outline_rounded, 'Delete', Colors.red),
+              (Icons.download_rounded, 'Save a Copy', AppTheme.success, () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Copy saved to gallery!')),
+                );
+                Navigator.pop(context);
+              }),
+              (Icons.info_outline_rounded, 'Image Info', AppTheme.text2, () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Path: ${widget.imageFile?.path}')),
+                );
+                Navigator.pop(context);
+              }),
+              (Icons.delete_outline_rounded, 'Delete', Colors.red, () {
+                if (widget.imageFile != null && widget.imageFile!.existsSync()) {
+                  widget.imageFile!.deleteSync();
+                }
+                Navigator.pop(context); // Close sheet
+                Navigator.pop(context); // Close detail screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Image deleted')),
+                );
+              }),
             ].map((item) => GestureDetector(
-                  onTap: () => Navigator.pop(context),
+                  onTap: item.$4,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.symmetric(

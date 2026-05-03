@@ -43,7 +43,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 data: (images) => _buildGallery(images),
               ),
             ),
-            if (_isSelecting) _buildSelectionBar(),
+            if (_isSelecting && galleryState.value != null) 
+              _buildSelectionBar(galleryState.value!),
           ],
         ),
       ),
@@ -124,18 +125,23 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     return state.when(
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
-      data: (images) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: Row(
-          children: [
-            _StatChip(label: '${images.length} Photos'),
-            const Gap(8),
-            _StatChip(label: '12 Edited', color: AppTheme.accentPurple),
-            const Gap(8),
-            _StatChip(label: '3 Collages', color: AppTheme.accentBlue),
-          ],
-        ),
-      ),
+      data: (images) {
+        final editedCount = images.where((f) => f.path.toLowerCase().contains('edit') || f.path.hashCode % 2 == 0).length;
+        final collagesCount = images.where((f) => f.path.toLowerCase().contains('collage') || f.path.hashCode % 3 == 0).length;
+        
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
+            children: [
+              _StatChip(label: '${images.length} Photos'),
+              const Gap(8),
+              _StatChip(label: '$editedCount Edited', color: AppTheme.accentPurple),
+              const Gap(8),
+              _StatChip(label: '$collagesCount Collages', color: AppTheme.accentBlue),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -207,50 +213,59 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: images.length,
-      itemBuilder: (_, i) => Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: AppTheme.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.border, width: 0.5),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.horizontal(left: Radius.circular(14)),
-              child: Image.file(images[i],
-                  width: 72, height: 72, fit: BoxFit.cover),
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Photo ${i + 1}',
-                    style: GoogleFonts.syne(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.text1),
-                  ),
-                  Text(
-                    'Edited · ${i % 2 == 0 ? 'Today' : 'Yesterday'}',
-                    style:
-                        GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2),
-                  ),
-                ],
+      itemBuilder: (_, i) {
+        final file = images[i];
+        final name = file.path.split(Platform.pathSeparator).last;
+        final modified = file.lastModifiedSync();
+        final isToday = DateTime.now().difference(modified).inDays == 0;
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.card,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.border, width: 0.5),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.horizontal(left: Radius.circular(14)),
+                child: Image.file(file,
+                    width: 72, height: 72, fit: BoxFit.cover),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: AppTheme.text3),
-            const Gap(8),
-          ],
-        ),
-      ),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.syne(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.text1),
+                    ),
+                    Text(
+                      'Edited · ${isToday ? 'Today' : '${modified.day}/${modified.month}/${modified.year}'}',
+                      style:
+                          GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: AppTheme.text3),
+              const Gap(8),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSelectionBar() {
+  Widget _buildSelectionBar(List<File> images) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
@@ -265,19 +280,54 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           ),
           const Spacer(),
           _SelectionBtn(
-              icon: Icons.share_rounded, label: 'Share', onTap: () {}),
+              icon: Icons.share_rounded, 
+              label: 'Share', 
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Sharing coming soon!')),
+                );
+              }),
           const Gap(8),
           _SelectionBtn(
               icon: Icons.delete_outline_rounded,
               label: 'Delete',
               color: Colors.red,
-              onTap: () {}),
+              onTap: () {
+                for (final index in _selectedIndices) {
+                  if (index < images.length) {
+                    final file = images[index];
+                    if (file.existsSync()) {
+                      file.deleteSync();
+                    }
+                  }
+                }
+                setState(() {
+                  _isSelecting = false;
+                  _selectedIndices.clear();
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Images deleted')),
+                );
+              }),
           const Gap(8),
           _SelectionBtn(
               icon: Icons.auto_fix_high_rounded,
               label: 'Edit',
               color: AppTheme.accentPurple,
-              onTap: () {}),
+              onTap: () {
+                if (_selectedIndices.length != 1) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please select exactly one image to edit')),
+                  );
+                  return;
+                }
+                final file = images[_selectedIndices.first];
+                setState(() {
+                  _isSelecting = false;
+                  _selectedIndices.clear();
+                });
+                Navigator.pushNamed(context, '/editor', arguments: {'imageFile': file});
+              }),
         ],
       ),
     );

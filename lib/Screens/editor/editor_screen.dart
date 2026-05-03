@@ -397,37 +397,52 @@ class _AdjustPanel extends ConsumerWidget {
   }
 }
 
-class _CropPanel extends StatelessWidget {
+class _CropPanel extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ratios = ['Free', '1:1', '4:3', '16:9', '3:4', '9:16'];
+    final ratioVals = [0.0, 1.0, 4/3, 16/9, 3/4, 9/16];
+    
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemCount: ratios.length,
-      itemBuilder: (_, i) => Container(
-        width: 64,
-        height: 64,
-        margin: const EdgeInsets.only(right: 10),
-        decoration: BoxDecoration(
-          color: i == 0 ? AppTheme.accent.withOpacity(0.15) : AppTheme.card,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: i == 0 ? AppTheme.accent : AppTheme.border,
-            width: i == 0 ? 1.5 : 0.5,
+      itemBuilder: (_, i) => GestureDetector(
+        onTap: () {
+          if (i > 0) {
+            ref.read(editorProvider.notifier).cropImage(ratioVals[i]);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Cropped to ${ratios[i]}'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: Container(
+          width: 64,
+          height: 64,
+          margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            color: i == 0 ? AppTheme.accent.withOpacity(0.15) : AppTheme.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: i == 0 ? AppTheme.accent : AppTheme.border,
+              width: i == 0 ? 1.5 : 0.5,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.crop_rounded,
-                color: i == 0 ? AppTheme.accent : AppTheme.text3, size: 22),
-            const Gap(4),
-            Text(ratios[i],
-                style: GoogleFonts.dmSans(
-                    fontSize: 10,
-                    color: i == 0 ? AppTheme.accent : AppTheme.text2)),
-          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.crop_rounded,
+                  color: i == 0 ? AppTheme.accent : AppTheme.text3, size: 22),
+              const Gap(4),
+              Text(ratios[i],
+                  style: GoogleFonts.dmSans(
+                      fontSize: 10,
+                      color: i == 0 ? AppTheme.accent : AppTheme.text2)),
+            ],
+          ),
         ),
       ),
     );
@@ -448,23 +463,33 @@ class _MorePanel extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemCount: tools.length,
-      itemBuilder: (_, i) => Container(
-        width: 72,
-        height: 80,
-        margin: const EdgeInsets.only(right: 10),
-        decoration: BoxDecoration(
-          color: AppTheme.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.border, width: 0.5),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(tools[i].$2, color: AppTheme.accentPurple, size: 24),
-            const Gap(6),
-            Text(tools[i].$1,
-                style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.text2)),
-          ],
+      itemBuilder: (_, i) => GestureDetector(
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${tools[i].$1} feature coming soon!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        child: Container(
+          width: 72,
+          height: 80,
+          margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.card,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.border, width: 0.5),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(tools[i].$2, color: AppTheme.accentPurple, size: 24),
+              const Gap(6),
+              Text(tools[i].$1,
+                  style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.text2)),
+            ],
+          ),
         ),
       ),
     );

@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:snapcraft/Screens/gallery/provider/gallery_provider.dart';
 import 'package:snapcraft/core/constant.dart';
 import 'package:snapcraft/widget/gradient_text.dart';
@@ -19,7 +22,9 @@ class CollageScreen extends ConsumerStatefulWidget {
 class _CollageScreenState extends ConsumerState<CollageScreen>
     with SingleTickerProviderStateMixin {
   int _selectedLayout = 0;
+  String _selectedRatio = '1:1';
   final _picker = ImagePicker();
+  final GlobalKey _collageKey = GlobalKey();
 
   final List<CollageLayout> _layouts = [
     CollageLayout(
@@ -123,8 +128,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
           ),
           const Gap(8),
           GestureDetector(
-            onTap: () =>
-                ref.read(collageProvider.notifier).exportCollage(context),
+            onTap: _exportCollage,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
@@ -143,6 +147,37 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _exportCollage() async {
+    try {
+      final boundary = _collageKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+      
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/snapcraft_collage_${DateTime.now().millisecondsSinceEpoch}.png');
+      await file.writeAsBytes(pngBytes);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Collage saved to gallery!'),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildLayoutPicker() {
@@ -198,6 +233,36 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
   Widget _buildCollageCanvas(CollageState state, CollageLayout layout) {
     final totalSlots = layout.rows * layout.cols;
 
+    Widget innerContent = Container(
+      color: state.background,
+      child: _buildLayoutGrid(layout, totalSlots, state),
+    );
+
+    // Tightly wrap the collage in the boundary to prevent exporting empty UI space
+    Widget boundaryContent = RepaintBoundary(
+      key: _collageKey,
+      child: innerContent,
+    );
+
+    Widget finalContent = boundaryContent;
+
+    // Apply aspect ratio if not 'Free'
+    if (_selectedRatio != 'Free') {
+      double ratioValue = 1.0;
+      switch (_selectedRatio) {
+        case '4:5': ratioValue = 4 / 5; break;
+        case '9:16': ratioValue = 9 / 16; break;
+        case '16:9': ratioValue = 16 / 9; break;
+        case '1:1': default: ratioValue = 1.0; break;
+      }
+      finalContent = Center(
+        child: AspectRatio(
+          aspectRatio: ratioValue,
+          child: boundaryContent,
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -206,7 +271,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
         border: Border.all(color: AppTheme.border, width: 0.5),
       ),
       clipBehavior: Clip.antiAlias,
-      child: _buildLayoutGrid(layout, totalSlots, state),
+      child: finalContent,
     );
   }
 
@@ -289,7 +354,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
   }
 
   Widget _buildRatioSelector() {
-    final ratios = ['1:1', '4:5', '9:16', '16:9'];
+    final ratios = ['Free', '1:1', '4:5', '9:16', '16:9'];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
@@ -297,25 +362,28 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
           Text('Canvas ratio',
               style: GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2)),
           const Spacer(),
-          ...ratios.map((r) => Container(
-                margin: const EdgeInsets.only(left: 6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: r == '1:1'
-                      ? AppTheme.accent.withOpacity(0.15)
-                      : AppTheme.card,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: r == '1:1' ? AppTheme.accent : AppTheme.border,
-                    width: 0.5,
+          ...ratios.map((r) => GestureDetector(
+                onTap: () => setState(() => _selectedRatio = r),
+                child: Container(
+                  margin: const EdgeInsets.only(left: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: r == _selectedRatio
+                        ? AppTheme.accent.withOpacity(0.15)
+                        : AppTheme.card,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: r == _selectedRatio ? AppTheme.accent : AppTheme.border,
+                      width: 0.5,
+                    ),
                   ),
+                  child: Text(r,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11,
+                        color: r == _selectedRatio ? AppTheme.accent : AppTheme.text2,
+                      )),
                 ),
-                child: Text(r,
-                    style: GoogleFonts.dmSans(
-                      fontSize: 11,
-                      color: r == '1:1' ? AppTheme.accent : AppTheme.text2,
-                    )),
               )),
         ],
       ),

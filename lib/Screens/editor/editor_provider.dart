@@ -1,11 +1,101 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapcraft/core/constant.dart';
+
+// ── Background Isolate Processing ─────────────────────────────────
+class _ProcessArgs {
+  final Uint8List imageBytes;
+  final double brightness;
+  final double contrast;
+  final double saturation;
+  final double warmth;
+
+  _ProcessArgs({
+    required this.imageBytes,
+    required this.brightness,
+    required this.contrast,
+    required this.saturation,
+    required this.warmth,
+  });
+}
+
+Future<Uint8List> _applyAdjustmentsIsolate(_ProcessArgs args) async {
+  var image = img.decodeImage(args.imageBytes);
+  if (image == null) return args.imageBytes;
+
+  if (args.brightness != 0) {
+    image = img.adjustColor(image, brightness: 1 + args.brightness);
+  }
+  if (args.contrast != 0) {
+    image = img.adjustColor(image, contrast: 1 + args.contrast);
+  }
+  if (args.saturation != 0) {
+    image = img.adjustColor(image, saturation: 1 + args.saturation);
+  }
+
+  if (args.warmth != 0) {
+    final int warmAmount = (args.warmth * 30).round();
+    final int width = image.width;
+    final int height = image.height;
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        final pixel = image.getPixelSafe(x, y);
+        final int red = pixel.r.toInt();
+        final int green = pixel.g.toInt();
+        final int blue = pixel.b.toInt();
+        final int alpha = pixel.a.toInt();
+
+        if (warmAmount > 0) {
+          image.setPixelRgba(
+            x, y,
+            (red + warmAmount).clamp(0, 255).toInt(),
+            green, blue, alpha,
+          );
+        } else {
+          image.setPixelRgba(
+            x, y,
+            red, green,
+            (blue + warmAmount.abs()).clamp(0, 255).toInt(),
+            alpha,
+          );
+        }
+      }
+    }
+  }
+
+  return Uint8List.fromList(img.encodeJpg(image, quality: 95));
+}
+
+Future<Uint8List> _cropIsolate(Map<String, dynamic> args) async {
+  final bytes = args['bytes'] as Uint8List;
+  final ratio = args['ratio'] as double;
+  
+  final image = img.decodeImage(bytes);
+  if (image == null) return bytes;
+
+  int w = image.width;
+  int h = image.height;
+  
+  if (w / h > ratio) {
+    w = (h * ratio).toInt();
+  } else {
+    h = (w / ratio).toInt();
+  }
+  
+  final startX = (image.width - w) ~/ 2;
+  final startY = (image.height - h) ~/ 2;
+
+  final cropped = img.copyCrop(image, x: startX, y: startY, width: w, height: h);
+  return Uint8List.fromList(img.encodeJpg(cropped, quality: 95));
+}
 
 // ── Filter Model ──────────────────────────────────────────────────
 class SnapFilter {
@@ -293,28 +383,61 @@ class EditorNotifier extends StateNotifier<EditorState> {
     );
   }
 
+  Timer? _debounce;
+
   void applyFilter(SnapFilter filter) {
     state = state.copyWith(activeFilter: filter);
-    _processImage();
+    _debouncedProcess();
   }
 
   void setBrightness(double value) {
     state = state.copyWith(brightness: value);
-    _processImage();
+    _debouncedProcess();
   }
 
   void setContrast(double value) {
     state = state.copyWith(contrast: value);
-    _processImage();
+    _debouncedProcess();
   }
 
   void setSaturation(double value) {
     state = state.copyWith(saturation: value);
-    _processImage();
+    _debouncedProcess();
   }
 
   void setWarmth(double value) {
     state = state.copyWith(warmth: value);
+    _debouncedProcess();
+  }
+
+  void _debouncedProcess() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () => _processImage());
+  }
+
+  Future<void> cropImage(double ratio) async {
+    if (state.originalImage == null) return;
+    state = state.copyWith(isProcessing: true);
+
+    final cropped = await compute(_cropIsolate, {
+      'bytes': state.originalImage!,
+      'ratio': ratio,
+    });
+
+    final newStack = [
+      ...state.undoStack.sublist(0, state.undoIndex + 1),
+      cropped,
+    ];
+
+    // Set the originalImage to the cropped one, so subsequent filters apply on the cropped version
+    state = state.copyWith(
+      originalImage: cropped,
+      processedImage: cropped,
+      isProcessing: false,
+      undoStack: newStack,
+      undoIndex: newStack.length - 1,
+    );
+    // Reapply current adjustments
     _processImage();
   }
 
@@ -344,13 +467,16 @@ class EditorNotifier extends StateNotifier<EditorState> {
     if (state.originalImage == null) return;
     state = state.copyWith(isProcessing: true);
 
-    // Run image processing in isolate
-    final processed = await _applyAdjustments(
-      state.originalImage!,
-      brightness: state.brightness,
-      contrast: state.contrast,
-      saturation: state.saturation,
-      warmth: state.warmth,
+    // Run image processing in isolate to prevent UI freezing
+    final processed = await compute(
+      _applyAdjustmentsIsolate,
+      _ProcessArgs(
+        imageBytes: state.originalImage!,
+        brightness: state.brightness,
+        contrast: state.contrast,
+        saturation: state.saturation,
+        warmth: state.warmth,
+      ),
     );
 
     // Update undo stack
@@ -365,71 +491,6 @@ class EditorNotifier extends StateNotifier<EditorState> {
       undoStack: newStack,
       undoIndex: newStack.length - 1,
     );
-  }
-
-  Future<Uint8List> _applyAdjustments(
-    Uint8List imageBytes, {
-    required double brightness,
-    required double contrast,
-    required double saturation,
-    required double warmth,
-  }) async {
-    var image = img.decodeImage(imageBytes);
-    if (image == null) return imageBytes;
-
-    // Brightness
-    if (brightness != 0) {
-      image = img.adjustColor(image, brightness: 1 + brightness);
-    }
-
-    // Contrast
-    if (contrast != 0) {
-      image = img.adjustColor(image, contrast: 1 + contrast);
-    }
-
-    // Saturation
-    if (saturation != 0) {
-      image = img.adjustColor(image, saturation: 1 + saturation);
-    }
-
-    // Warmth (shift red/blue channels)
-    if (warmth != 0) {
-      final int warmAmount = (warmth * 30).round();
-      final int width = image.width;
-      final int height = image.height;
-
-      for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-          final pixel = image.getPixelSafe(x, y);
-          final int red = pixel.r.toInt();
-          final int green = pixel.g.toInt();
-          final int blue = pixel.b.toInt();
-          final int alpha = pixel.a.toInt();
-
-          if (warmAmount > 0) {
-            image.setPixelRgba(
-              x,
-              y,
-              (red + warmAmount).clamp(0, 255).toInt(),
-              green,
-              blue,
-              alpha,
-            );
-          } else {
-            image.setPixelRgba(
-              x,
-              y,
-              red,
-              green,
-              (blue + warmAmount.abs()).clamp(0, 255).toInt(),
-              alpha,
-            );
-          }
-        }
-      }
-    }
-
-    return Uint8List.fromList(img.encodeJpg(image, quality: 95));
   }
 
   Future<void> aiEnhance() async {

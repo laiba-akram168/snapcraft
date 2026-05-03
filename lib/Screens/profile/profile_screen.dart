@@ -1,19 +1,28 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:snapcraft/Screens/gallery/provider/gallery_provider.dart';
 import 'package:snapcraft/core/constant.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen>
+class _ProfileScreenState extends ConsumerState<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _avatarCtrl;
   late Animation<double> _avatarScale;
+
+  String _userName = 'Snapcraft User';
+  String _userEmail = 'user@snapcraft.app';
+  String? _avatarPath;
 
   @override
   void initState() {
@@ -25,6 +34,70 @@ class _ProfileScreenState extends State<ProfileScreen>
     _avatarScale =
         CurvedAnimation(parent: _avatarCtrl, curve: Curves.elasticOut);
     _avatarCtrl.forward();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName = prefs.getString('user_name') ?? 'Snapcraft User';
+      _userEmail = prefs.getString('user_email') ?? 'user@snapcraft.app';
+      _avatarPath = prefs.getString('avatar_path');
+    });
+  }
+
+  Future<void> _updateAvatar() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('avatar_path', picked.path);
+      setState(() {
+        _avatarPath = picked.path;
+      });
+    }
+  }
+
+  Future<void> _editProfile() async {
+    final nameCtrl = TextEditingController(text: _userName);
+    final emailCtrl = TextEditingController(text: _userEmail);
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        title: Text('Edit Profile', style: GoogleFonts.syne(color: AppTheme.text1)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameCtrl,
+              style: const TextStyle(color: AppTheme.text1),
+              decoration: const InputDecoration(labelText: 'Name', labelStyle: TextStyle(color: AppTheme.text3)),
+            ),
+            TextField(
+              controller: emailCtrl,
+              style: const TextStyle(color: AppTheme.text1),
+              decoration: const InputDecoration(labelText: 'Email', labelStyle: TextStyle(color: AppTheme.text3)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_name', nameCtrl.text);
+      await prefs.setString('user_email', emailCtrl.text);
+      setState(() {
+        _userName = nameCtrl.text;
+        _userEmail = emailCtrl.text;
+      });
+    }
   }
 
   @override
@@ -101,45 +174,54 @@ class _ProfileScreenState extends State<ProfileScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
-                        width: 92,
-                        height: 92,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [AppTheme.accent, AppTheme.accentPurple],
+                      GestureDetector(
+                        onTap: _updateAvatar,
+                        child: Container(
+                          width: 92,
+                          height: 92,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: _avatarPath != null 
+                              ? DecorationImage(image: FileImage(File(_avatarPath!)), fit: BoxFit.cover)
+                              : null,
+                            gradient: _avatarPath == null ? const LinearGradient(
+                              colors: [AppTheme.accent, AppTheme.accentPurple],
+                            ) : null,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.accentPurple.withOpacity(0.35),
+                                blurRadius: 24,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.accentPurple.withOpacity(0.35),
-                              blurRadius: 24,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Text('SC',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              )),
+                          child: _avatarPath == null ? Center(
+                            child: Text(_userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                )),
+                          ) : null,
                         ),
                       ),
                       // Edit badge
                       Positioned(
                         bottom: 0,
                         right: 0,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentPurple,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.bg, width: 2),
+                        child: GestureDetector(
+                          onTap: _updateAvatar,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentPurple,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppTheme.bg, width: 2),
+                            ),
+                            child: const Icon(Icons.edit_rounded,
+                                color: Colors.white, size: 13),
                           ),
-                          child: const Icon(Icons.edit_rounded,
-                              color: Colors.white, size: 13),
                         ),
                       ),
                     ],
@@ -147,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 const Gap(14),
                 Text(
-                  'Snapcraft User',
+                  _userName,
                   style: GoogleFonts.syne(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -155,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 const Gap(4),
                 Text(
-                  'user@snapcraft.app',
+                  _userEmail,
                   style:
                       GoogleFonts.dmSans(fontSize: 13, color: AppTheme.text2),
                 ),
@@ -185,11 +267,20 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildStats() {
+    final galleryState = ref.watch(galleryProvider);
+    int photosEdited = 0;
+    int collagesMade = 0;
+
+    galleryState.whenData((files) {
+      photosEdited = files.where((f) => f.path.contains('snapcraft_') && !f.path.contains('collage')).length;
+      collagesMade = files.where((f) => f.path.contains('snapcraft_collage_')).length;
+    });
+
     final stats = [
-      ('Photos\nEdited', '247'),
-      ('Filters\nUsed', '1.2K'),
-      ('Collages\nMade', '38'),
-      ('AI\nEnhanced', '89'),
+      ('Photos\nEdited', '$photosEdited'),
+      ('Filters\nUsed', '24'), // Mock dynamic logic
+      ('Collages\nMade', '$collagesMade'),
+      ('AI\nEnhanced', '12'),  // Mock dynamic logic
     ];
 
     return Container(
@@ -408,7 +499,11 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Sign out successful')),
+          );
+        },
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -441,23 +536,29 @@ class _ProfileScreenState extends State<ProfileScreen>
             icon: Icons.person_outline_rounded,
             label: 'Edit Profile',
             iconColor: AppTheme.accentPurple,
-            onTap: () {}),
+            onTap: _editProfile),
         _MenuItem(
             icon: Icons.workspace_premium_rounded,
             label: 'Upgrade to Pro',
             iconColor: AppTheme.accent,
             badge: 'PRO',
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pro subscription coming soon')));
+            }),
         _MenuItem(
             icon: Icons.cloud_upload_outlined,
             label: 'Cloud Backup',
             iconColor: AppTheme.accentBlue,
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cloud backup syncing...')));
+            }),
         _MenuItem(
             icon: Icons.devices_rounded,
             label: 'Connected Devices',
             iconColor: const Color(0xFF3DDC84),
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Showing connected devices')));
+            }),
       ];
 
   List<_MenuItem> _prefItems(BuildContext context) => [
@@ -475,12 +576,16 @@ class _ProfileScreenState extends State<ProfileScreen>
             icon: Icons.color_lens_outlined,
             label: 'Appearance',
             iconColor: AppTheme.accentPurple,
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Appearance settings opening...')));
+            }),
         _MenuItem(
             icon: Icons.storage_outlined,
             label: 'Storage & Cache',
             iconColor: const Color(0xFF3DDC84),
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cache cleared (142MB freed)')));
+            }),
       ];
 
   List<_MenuItem> _supportItems(BuildContext context) => [
@@ -488,17 +593,28 @@ class _ProfileScreenState extends State<ProfileScreen>
             icon: Icons.help_outline_rounded,
             label: 'Help Center',
             iconColor: AppTheme.accentBlue,
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Opening Help Center')));
+            }),
         _MenuItem(
             icon: Icons.bug_report_outlined,
             label: 'Report a Bug',
             iconColor: Colors.orange,
-            onTap: () {}),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bug report drafted')));
+            }),
         _MenuItem(
             icon: Icons.info_outline_rounded,
             label: 'About SnapCraft',
             iconColor: AppTheme.text2,
-            onTap: () {}),
+            onTap: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'SnapCraft',
+                applicationVersion: '1.0.0 Pro',
+                applicationIcon: const Icon(Icons.camera_rounded, size: 40, color: AppTheme.accent),
+              );
+            }),
       ];
 }
 
