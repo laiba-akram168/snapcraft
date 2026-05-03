@@ -13,9 +13,14 @@ import 'package:snapcraft/Screens/profile/profile_screen.dart';
 import 'package:snapcraft/Screens/setting/setting_screen.dart';
 import 'package:snapcraft/Screens/splash/splash_screen.dart';
 import 'package:snapcraft/core/constant.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Keep native splash visible while initializing
+  FlutterNativeSplash.preserve(widgetsBinding: WidgetsBinding.instance);
+  
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

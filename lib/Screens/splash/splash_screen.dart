@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapcraft/core/constant.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -63,6 +64,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _startSequence() async {
+    // Give native splash time to display (2 seconds)
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Remove native splash before showing Flutter animations
+    FlutterNativeSplash.remove();
+
     await Future.delayed(const Duration(milliseconds: 300));
     _logoCtrl.forward();
     await Future.delayed(const Duration(milliseconds: 600));
@@ -81,6 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
     await _logoCtrl.reverse();
 
     if (!mounted) return;
+
     Navigator.pushReplacementNamed(
       context,
       onboardingDone ? '/home' : '/onboarding',
