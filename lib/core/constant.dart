@@ -2,36 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors — Soft Pastel Light Theme
-  static const Color bg = Color(0xFFFBF7F4); // warm cream white
-  static const Color surface = Color(0xFFF5EFF8); // very light lavender blush
-  static const Color card = Color(0xFFFFFFFF); // pure white cards
-  static const Color border = Color(0x22B0A0C8); // soft lavender border
+  // Colors — Deep Dark Modern Theme
+  static const Color bg = Color(0xFF0F0F1E); // Deep navy black
+  static const Color surface = Color(0xFF1A1A2E); // Dark navy
+  static const Color card = Color(0xFF16213E); // Darker blue-navy
+  static const Color border = Color(0xFF0F3460); // Deep blue border
 
-  static const Color accent = Color(0xFFB388FF); // pastel lavender
-  static const Color accentPurple = Color(0xFFF48FB1); // pastel rose/pink
-  static const Color accentBlue = Color(0xFF81D4FA); // pastel sky blue
-  static const Color success = Color(0xFFA5D6A7); // pastel mint green
+  static const Color accent = Color(0xFF00D4FF); // Cyan
+  static const Color accentPurple = Color(0xFF7B61FF); // Vibrant purple
+  static const Color accentBlue = Color(0xFF00B4DB); // Ocean blue
+  static const Color success = Color(0xFF00D97D); // Bright green
 
-  static const Color text1 = Color(0xFF3D2F4A); // deep soft plum (readable)
-  static const Color text2 = Color(0xFF7B6B8D); // muted lavender-grey
-  static const Color text3 = Color(0xFFBAADCC); // light muted lilac
+  static const Color text1 = Color(0xFFFAFAFA); // Near white
+  static const Color text2 = Color(0xFFB0B0B0); // Light grey
+  static const Color text3 = Color(0xFF707070); // Medium grey
 
-  // Gradients — soft pastel blends
+  // Gradients — Modern dark blends
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [Color(0xFFCE93D8), Color(0xFFF48FB1)], // pastel purple → rose
+    colors: [Color(0xFF7B61FF), Color(0xFF00D4FF)], // vibrant purple → cyan
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [Color(0xFFB388FF), Color(0xFF81D4FA)],
+    colors: [Color(0xFF00D4FF), Color(0xFF00B4DB)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
   static const LinearGradient bgGradient = LinearGradient(
-    colors: [Color(0xFFFBF7F4), Color(0xFFF0EAF8)], // cream → lavender blush
+    colors: [Color(0xFF0F0F1E), Color(0xFF1A1A2E)], // deep navy → dark navy
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -39,20 +39,20 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
       scaffoldBackgroundColor: bg,
-      colorScheme: const ColorScheme.light(
+      colorScheme: const ColorScheme.dark(
         primary: accent,
         secondary: accentPurple,
         surface: surface,
         background: bg,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
+        onPrimary: bg,
+        onSecondary: bg,
         onSurface: text1,
         onBackground: text1,
       ),
       textTheme:
-          GoogleFonts.dmSansTextTheme(ThemeData.light().textTheme).copyWith(
+          GoogleFonts.dmSansTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.syne(
           fontSize: 32,
           fontWeight: FontWeight.w800,
@@ -73,7 +73,7 @@ class AppTheme {
         bodySmall: GoogleFonts.dmSans(fontSize: 12, color: text2),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: bg,
+        backgroundColor: surface,
         elevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: text1),
@@ -84,7 +84,7 @@ class AppTheme {
         ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: card,
+        backgroundColor: surface,
         selectedItemColor: accent,
         unselectedItemColor: text3,
         type: BottomNavigationBarType.fixed,
@@ -93,7 +93,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: card,
         elevation: 2,
-        shadowColor: const Color(0x22B0A0C8),
+        shadowColor: const Color(0xFF000000),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: border, width: 1),
