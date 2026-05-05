@@ -2,36 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors — Deep Dark Modern Theme
-  static const Color bg = Color(0xFF0F0F1E); // Deep navy black
-  static const Color surface = Color(0xFF1A1A2E); // Dark navy
-  static const Color card = Color(0xFF16213E); // Darker blue-navy
-  static const Color border = Color(0xFF0F3460); // Deep blue border
+  // Colors — Light Warm Theme
+  static const Color bg = Color(0xFFFFFBF8); // Off-white warm
+  static const Color surface = Color(0xFFFFFFFF); // White
+  static const Color card = Color(0xFFFFF9F6); // Light warm cream
+  static const Color border = Color(0xFFE8D4CC); // Light warm border
 
-  static const Color accent = Color(0xFF00D4FF); // Cyan
-  static const Color accentPurple = Color(0xFF7B61FF); // Vibrant purple
-  static const Color accentBlue = Color(0xFF00B4DB); // Ocean blue
-  static const Color success = Color(0xFF00D97D); // Bright green
+  static const Color accent = Color(0xFFF17A98); // Warm pink
+  static const Color accentPurple = Color(0xFFFFA066); // Warm orange
+  static const Color accentBlue = Color(0xFFFF9F7F); // Coral warm
+  static const Color success = Color(0xFFF17A98); // Warm pink accent
 
-  static const Color text1 = Color(0xFFFAFAFA); // Near white
-  static const Color text2 = Color(0xFFB0B0B0); // Light grey
-  static const Color text3 = Color(0xFF707070); // Medium grey
+  static const Color text1 = Color(0xFF1A1A1A); // Near black
+  static const Color text2 = Color(0xFF4F4F4F); // Dark grey
+  static const Color text3 = Color(0xFF8F8F8F); // Medium grey
 
   // Gradients — Modern dark blends
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [Color(0xFF7B61FF), Color(0xFF00D4FF)], // vibrant purple → cyan
+    colors: [Color(0xFFF17A98), Color(0xFFFFA066)], // warm pink → orange
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [Color(0xFF00D4FF), Color(0xFF00B4DB)],
+    colors: [Color(0xFFF17A98), Color(0xFFFF9F7F)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
 
   static const LinearGradient bgGradient = LinearGradient(
-    colors: [Color(0xFF0F0F1E), Color(0xFF1A1A2E)], // deep navy → dark navy
+    colors: [Color(0xFFFFFBF8), Color(0xFFFFE8D4)], // off-white → warm cream
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
@@ -39,20 +39,20 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       scaffoldBackgroundColor: bg,
-      colorScheme: const ColorScheme.dark(
+      colorScheme: const ColorScheme.light(
         primary: accent,
         secondary: accentPurple,
         surface: surface,
         background: bg,
-        onPrimary: bg,
-        onSecondary: bg,
+        onPrimary: Color(0xFFFFFFFF),
+        onSecondary: Color(0xFFFFFFFF),
         onSurface: text1,
         onBackground: text1,
       ),
       textTheme:
-          GoogleFonts.dmSansTextTheme(ThemeData.dark().textTheme).copyWith(
+          GoogleFonts.dmSansTextTheme(ThemeData.light().textTheme).copyWith(
         displayLarge: GoogleFonts.syne(
           fontSize: 32,
           fontWeight: FontWeight.w800,
@@ -101,7 +101,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: Color(0xFFFAFAFA),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: border),
