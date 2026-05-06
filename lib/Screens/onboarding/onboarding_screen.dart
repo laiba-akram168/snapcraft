@@ -218,22 +218,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: _buildIllustration(page),
             ),
           ),
-          const Gap(60),
+          const Gap(40),
           Text(
             page.title,
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  fontSize: 34,
-                  height: 1.1,
-                ),
+            style: GoogleFonts.syne(
+              fontSize: 36,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.text1,
+              letterSpacing: -1,
+              height: 1.1,
+            ),
             textAlign: TextAlign.center,
           ),
-          const Gap(20),
+          const Gap(16),
           Text(
             page.subtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 16,
-                  color: AppTheme.text2,
-                ),
+            style: GoogleFonts.dmSans(
+              fontSize: 15,
+              color: AppTheme.text2,
+              fontWeight: FontWeight.w500,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
           const Gap(40),
@@ -279,44 +284,64 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return Stack(
       alignment: Alignment.center,
       children: [
+        // Pulsing circles
+        ...List.generate(3, (index) {
+          return AnimatedBuilder(
+            animation: _iconCtrl,
+            builder: (context, child) {
+              final scale = 1.0 + (index * 0.2) + (0.1 * _iconFloat.value / 10).abs();
+              return Container(
+                width: 180 * scale,
+                height: 180 * scale,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: page.accentColor.withOpacity(0.05 * (3 - index)),
+                    width: 2,
+                  ),
+                ),
+              );
+            },
+          );
+        }),
         Container(
-          width: 220,
-          height: 220,
+          width: 140,
+          height: 140,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: page.accentColor.withOpacity(0.05),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: page.accentColor.withOpacity(0.1),
+                blurRadius: 40,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
         ),
         Container(
-          width: 160,
-          height: 160,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: page.accentColor.withOpacity(0.1),
-          ),
-        ),
-        Container(
-          width: 110,
-          height: 110,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [page.accentColor, page.accentColor.withOpacity(0.7)],
+              colors: [page.accentColor, page.accentColor.withOpacity(0.8)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: page.accentColor.withOpacity(0.3),
-                blurRadius: 30,
+                color: page.accentColor.withOpacity(0.4),
+                blurRadius: 25,
                 offset: const Offset(0, 10),
               ),
             ],
+            border: Border.all(color: Colors.white, width: 3),
           ),
           child: Center(
             child: Text(
               page.emoji,
-              style: const TextStyle(fontSize: 48),
+              style: const TextStyle(fontSize: 44),
             ),
           ),
         ),
