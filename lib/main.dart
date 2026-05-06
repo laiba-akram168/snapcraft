@@ -1,6 +1,9 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:snapcraft/Screens/ImageDetail/image_detail_screen.dart';
 import 'package:snapcraft/Screens/Notification/notification_screen.dart';
 import 'package:snapcraft/Screens/ai_assistant/ai_assistant_screen.dart';
@@ -123,6 +126,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(index: _currentIndex, children: _screens),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -131,65 +135,84 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   Widget _buildFAB() {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/editor'),
-      child: Container(
-        width: 58,
-        height: 58,
-        decoration: const BoxDecoration(
-          gradient: AppTheme.brandGradient,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-                color: Color(0x66FF6B35), blurRadius: 20, offset: Offset(0, 4))
-          ],
+    return Container(
+      margin: const EdgeInsets.only(top: 36),
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/editor'),
+        child: Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            gradient: AppTheme.brandGradient,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                  color: AppTheme.accent.withOpacity(0.4),
+                  blurRadius: 25,
+                  offset: const Offset(0, 8))
+            ],
+            border: Border.all(color: Colors.white, width: 2.5),
+          ),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
         ),
-        child: const Icon(Icons.add_a_photo_rounded,
-            color: Colors.white, size: 26),
       ),
     );
   }
 
   Widget _buildBottomNav() {
-    return BottomAppBar(
-      color: AppTheme.surface,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-              icon: Icons.home_rounded,
-              label: 'Home',
-              index: 0,
-              current: _currentIndex,
-              onTap: _onTap),
-          _NavItem(
-              icon: Icons.photo_library_rounded,
-              label: 'Gallery',
-              index: 1,
-              current: _currentIndex,
-              onTap: _onTap),
-          const SizedBox(width: 48),
-          _NavItem(
-              icon: Icons.grid_view_rounded,
-              label: 'Collage',
-              index: 2,
-              current: _currentIndex,
-              onTap: _onTap),
-          _NavItem(
-              icon: Icons.auto_awesome_rounded,
-              label: 'AI',
-              index: 3,
-              current: _currentIndex,
-              onTap: _onTap),
-          _NavItem(
-              icon: Icons.person_rounded,
-              label: 'Profile',
-              index: 4,
-              current: _currentIndex,
-              onTap: _onTap),
+    return Container(
+      height: 84,
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
         ],
+        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter:
+              SystemUiOverlayStyle.light.statusBarBrightness == Brightness.light
+                  ? ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12)
+                  : ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _NavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Home',
+                  index: 0,
+                  current: _currentIndex,
+                  onTap: _onTap),
+              _NavItem(
+                  icon: Icons.photo_library_rounded,
+                  label: 'Gallery',
+                  index: 1,
+                  current: _currentIndex,
+                  onTap: _onTap),
+              const Gap(60),
+              _NavItem(
+                  icon: Icons.auto_awesome_rounded,
+                  label: 'Magic AI',
+                  index: 3,
+                  current: _currentIndex,
+                  onTap: _onTap),
+              _NavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Profile',
+                  index: 4,
+                  current: _currentIndex,
+                  onTap: _onTap),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -218,30 +241,39 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppTheme.accent.withOpacity(0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon,
-                  color: isActive ? AppTheme.accent : AppTheme.text3, size: 20),
+            Icon(
+              icon,
+              color:
+                  isActive ? AppTheme.accent : AppTheme.text3.withOpacity(0.5),
+              size: 22,
             ),
-            const SizedBox(height: 2),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: isActive ? AppTheme.accent : AppTheme.text3,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                )),
+            const Gap(4),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 10,
+                color: isActive
+                    ? AppTheme.accent
+                    : AppTheme.text3.withOpacity(0.5),
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+            if (isActive) ...[
+              const Gap(2),
+              Container(
+                width: 4,
+                height: 4,
+                decoration: const BoxDecoration(
+                  color: AppTheme.accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -74,249 +76,318 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen>
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(aiState),
-            if (aiState.messages.isEmpty) _buildWelcome(aiState),
-            Expanded(child: _buildChatList(aiState)),
-            if (aiState.messages.isEmpty) _buildSuggestions(),
-            _buildInputBar(aiState),
-          ],
-        ),
+      body: Stack(
+        children: [
+          // Background Gradient
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: AppTheme.surfaceGradient,
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const Gap(80), // Space for floating header
+                if (aiState.messages.isEmpty) _buildWelcome(aiState),
+                Expanded(child: _buildChatList(aiState)),
+                if (aiState.messages.isEmpty) _buildSuggestions(),
+                _buildInputBar(aiState),
+              ],
+            ),
+          ),
+
+          // Floating Header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildHeader(aiState),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildHeader(AiState state) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppTheme.border, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          // AI Avatar with pulse
-          AnimatedBuilder(
-            animation: _pulseCtrl,
-            builder: (_, __) => Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [AppTheme.accentPurple, AppTheme.accent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: state.isConnected
-                    ? [
-                        BoxShadow(
-                          color: AppTheme.accentPurple
-                              .withOpacity(0.3 + 0.2 * _pulseCtrl.value),
-                          blurRadius: 12 + 8 * _pulseCtrl.value,
-                        )
-                      ]
-                    : [],
-              ),
-              child: const Icon(Icons.auto_awesome_rounded,
-                  color: Colors.white, size: 20),
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.accent.withOpacity(0.08),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
             ),
-          ),
-          const Gap(12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GradientText(
-                'SnapAI',
-                gradient: AppTheme.brandGradient,
-                style:
-                    GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-              Row(
+          ],
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
                 children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          state.isConnected ? AppTheme.success : AppTheme.text3,
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.5), width: 1),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded,
+                          color: AppTheme.text1, size: 20),
                     ),
                   ),
-                  const Gap(5),
-                  Text(
-                    state.isConnected
-                        ? 'Online · Ready to enhance'
-                        : 'Connecting...',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 11,
-                      color:
-                          state.isConnected ? AppTheme.success : AppTheme.text3,
+                  const Gap(16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Snap AI',
+                          style: GoogleFonts.syne(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.text1,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: state.isConnected
+                                    ? AppTheme.success
+                                    : AppTheme.text3,
+                                shape: BoxShape.circle,
+                                boxShadow: state.isConnected
+                                    ? [
+                                        BoxShadow(
+                                          color:
+                                              AppTheme.success.withOpacity(0.4),
+                                          blurRadius: 6,
+                                        )
+                                      ]
+                                    : null,
+                              ),
+                            ),
+                            const Gap(8),
+                            Text(
+                              state.isConnected ? 'AI Online' : 'Connecting...',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.text2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => ref.read(aiProvider.notifier).clearMessages(),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.5), width: 1),
+                      ),
+                      child: const Icon(Icons.delete_outline_rounded,
+                          color: AppTheme.text2, size: 22),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-          const Spacer(),
-          _IconBtn(icon: Icons.settings_outlined, onTap: () {}),
-          const Gap(8),
-          _IconBtn(icon: Icons.more_vert_rounded, onTap: () {}),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildWelcome(AiState state) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.accentPurple.withOpacity(0.12),
-                  AppTheme.accent.withOpacity(0.08),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return Expanded(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.brandGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.accent.withOpacity(0.4),
+                      blurRadius: 35,
+                      offset: const Offset(0, 15),
+                    )
+                  ],
+                ),
+                child: const Icon(Icons.auto_awesome_rounded,
+                    color: Colors.white, size: 48),
               ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.border, width: 0.5),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.waving_hand_rounded,
-                    color: AppTheme.accentPurple, size: 32),
-                const Gap(12),
-                Text(
-                  'Hi! I\'m SnapAI',
-                  style: GoogleFonts.syne(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.text1),
+              const Gap(40),
+              Text(
+                'How can I help?',
+                style: GoogleFonts.syne(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.text1,
+                  letterSpacing: -1,
                 ),
-                const Gap(8),
-                Text(
-                  'Your AI-powered photo enhancement assistant. Tell me how you\'d like to transform your photo.',
-                  style: GoogleFonts.dmSans(
-                      fontSize: 13, color: AppTheme.text2, height: 1.5),
-                  textAlign: TextAlign.center,
+              ),
+              const Gap(16),
+              Text(
+                'I can transform your photos with AI magic. Remove backgrounds, apply artistic filters, or enhance every detail with a simple request.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.dmSans(
+                  fontSize: 16,
+                  color: AppTheme.text2,
+                  height: 1.6,
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildChatList(AiState state) {
-    if (state.messages.isEmpty) return const SizedBox.shrink();
-
     return ListView.builder(
       controller: _scrollCtrl,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      itemCount: state.messages.length + (state.isTyping ? 1 : 0),
-      itemBuilder: (_, i) {
-        if (state.isTyping && i == state.messages.length) {
-          return _TypingBubble();
-        }
-        final msg = state.messages[i];
-        return _MessageBubble(message: msg);
-      },
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+      itemCount: state.messages.length,
+      itemBuilder: (_, i) => _MessageBubble(message: state.messages[i]),
     );
   }
 
   Widget _buildSuggestions() {
-    return SizedBox(
-      height: 44,
+    return Container(
+      height: 52,
+      margin: const EdgeInsets.only(bottom: 24),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: _suggestions.length,
-        itemBuilder: (_, i) => GestureDetector(
-          onTap: () => _sendMessage(_suggestions[i]),
-          child: Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppTheme.card,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.border, width: 0.5),
+        itemBuilder: (_, i) {
+          return GestureDetector(
+            onTap: () => _sendMessage(_suggestions[i]),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+                border: Border.all(color: AppTheme.border, width: 1),
+              ),
+              child: Center(
+                child: Text(
+                  _suggestions[i],
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.text1,
+                  ),
+                ),
+              ),
             ),
-            child: Text(
-              _suggestions[i],
-              style: GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2),
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildInputBar(AiState state) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppTheme.border, width: 0.5)),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       child: Row(
         children: [
-          // Attach image button
-          GestureDetector(
-            onTap: () => ref.read(aiProvider.notifier).attachImage(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.border, width: 0.5),
-              ),
-              child: const Icon(Icons.attach_file_rounded,
-                  color: AppTheme.text2, size: 18),
-            ),
-          ),
-          const Gap(10),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.border, width: 0.5),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
+                ],
+                border: Border.all(color: AppTheme.border, width: 1.5),
               ),
               child: TextField(
                 controller: _msgCtrl,
-                style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.text1),
+                style: GoogleFonts.dmSans(
+                    fontSize: 15,
+                    color: AppTheme.text1,
+                    fontWeight: FontWeight.w500),
                 decoration: InputDecoration(
-                  hintText: 'Ask SnapAI anything...',
-                  hintStyle:
-                      GoogleFonts.dmSans(fontSize: 14, color: AppTheme.text3),
+                  hintText: 'Ask AI magic...',
+                  hintStyle: GoogleFonts.dmSans(
+                      color: AppTheme.text3, fontWeight: FontWeight.w500),
                   border: InputBorder.none,
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
                 onSubmitted: _sendMessage,
                 textInputAction: TextInputAction.send,
               ),
             ),
           ),
-          const Gap(10),
+          const Gap(12),
           GestureDetector(
             onTap: () => _sendMessage(_msgCtrl.text),
             child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                gradient: AppTheme.accentGradient,
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: AppTheme.brandGradient,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  )
+                ],
               ),
               child:
-                  const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                  const Icon(Icons.send_rounded, color: Colors.white, size: 24),
             ),
           ),
         ],
@@ -335,7 +406,7 @@ class _MessageBubble extends StatelessWidget {
     final isUser = message.isUser;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Row(
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -343,32 +414,45 @@ class _MessageBubble extends StatelessWidget {
         children: [
           if (!isUser) ...[
             Container(
-              width: 28,
-              height: 28,
-              decoration: const BoxDecoration(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
                 gradient: AppTheme.brandGradient,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.2),
+                    blurRadius: 10,
+                  )
+                ],
               ),
               child: const Icon(Icons.auto_awesome_rounded,
-                  color: Colors.white, size: 13),
+                  color: Colors.white, size: 16),
             ),
-            const Gap(8),
+            const Gap(12),
           ],
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                gradient: isUser ? AppTheme.accentGradient : null,
-                color: isUser ? null : AppTheme.card,
+                gradient: isUser ? AppTheme.brandGradient : null,
+                color: isUser ? null : Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isUser ? 16 : 4),
-                  bottomRight: Radius.circular(isUser ? 4 : 16),
+                  topLeft: const Radius.circular(24),
+                  topRight: const Radius.circular(24),
+                  bottomLeft: Radius.circular(isUser ? 24 : 6),
+                  bottomRight: Radius.circular(isUser ? 6 : 24),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  )
+                ],
                 border: isUser
                     ? null
-                    : Border.all(color: AppTheme.border, width: 0.5),
+                    : Border.all(color: AppTheme.border, width: 1),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,41 +460,49 @@ class _MessageBubble extends StatelessWidget {
                   Text(
                     message.text,
                     style: GoogleFonts.dmSans(
-                      fontSize: 13,
-                      color: Colors.white,
-                      height: 1.5,
+                      fontSize: 14,
+                      color: isUser ? Colors.white : AppTheme.text1,
+                      height: 1.6,
+                      fontWeight: isUser ? FontWeight.w600 : FontWeight.w500,
                     ),
                   ),
                   if (message.imageFile != null) ...[
-                    const Gap(8),
+                    const Gap(12),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(16),
                       child: Image.file(message.imageFile!,
-                          width: 180, fit: BoxFit.cover),
+                          width: 220, fit: BoxFit.cover),
                     ),
                   ],
                   if (message.suggestions != null) ...[
-                    const Gap(10),
+                    const Gap(14),
                     Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: message.suggestions!
                           .map((s) => GestureDetector(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 5),
+                                      horizontal: 14, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.surface,
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: isUser
+                                        ? Colors.white.withOpacity(0.15)
+                                        : AppTheme.bg,
+                                    borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
-                                        color: AppTheme.accentPurple
-                                            .withOpacity(0.4),
-                                        width: 0.5),
+                                        color: (isUser
+                                                ? Colors.white
+                                                : AppTheme.accentSecondary)
+                                            .withOpacity(0.3),
+                                        width: 1),
                                   ),
                                   child: Text(s,
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 11,
-                                        color: AppTheme.accentPurple,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: isUser
+                                            ? Colors.white
+                                            : AppTheme.accentSecondary,
                                       )),
                                 ),
                               ))
@@ -421,6 +513,7 @@ class _MessageBubble extends StatelessWidget {
               ),
             ),
           ),
+          if (isUser) const Gap(12),
         ],
       ),
     );

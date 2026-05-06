@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -25,8 +26,8 @@ class _SnapCardState extends State<SnapCard>
     super.initState();
     _ctrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 150));
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
     );
   }
 
@@ -49,81 +50,143 @@ class _SnapCardState extends State<SnapCard>
         scale: _scaleAnim,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.border, width: 0.5),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.shadowSm,
+            border: Border.all(color: AppTheme.border, width: 1),
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
               // Image
-              Image.file(widget.imageFile,
-                  fit: BoxFit.cover, width: double.infinity),
+              AspectRatio(
+                aspectRatio: 0.75,
+                child: Image.file(
+                  widget.imageFile,
+                  fit: BoxFit.cover,
+                ),
+              ),
 
-              // Bottom overlay
+              // Bottom gradient overlay
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  decoration: const BoxDecoration(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
-                      colors: [Colors.black87, Colors.transparent],
+                      colors: [
+                        Colors.black.withOpacity(0.6),
+                        Colors.black.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Today',
-                          style: GoogleFonts.dmSans(
-                              fontSize: 11, color: Colors.white70),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.2), width: 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'CREATION',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Edited recently',
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 10,
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () =>
+                                  setState(() => _isFavourite = !_isFavourite),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: _isFavourite
+                                      ? AppTheme.accent
+                                      : Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: Colors.white.withOpacity(0.1),
+                                      width: 1),
+                                ),
+                                child: Icon(
+                                  _isFavourite
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () =>
-                            setState(() => _isFavourite = !_isFavourite),
-                        child: Icon(
-                          _isFavourite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          color: _isFavourite ? Colors.red : Colors.white70,
-                          size: 16,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
 
-              // Edit badge
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentPurple.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.auto_fix_high_rounded,
-                          color: Colors.white, size: 9),
-                      const Gap(3),
-                      Text('AI',
+              // AI Badge (Optional/Dynamic)
+              if (widget.imageFile.path.contains('ai'))
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.2), width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.auto_awesome_rounded,
+                            color: AppTheme.accentSecondary, size: 10),
+                        const Gap(4),
+                        Text(
+                          'AI',
                           style: GoogleFonts.syne(
-                              fontSize: 9,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700)),
-                    ],
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

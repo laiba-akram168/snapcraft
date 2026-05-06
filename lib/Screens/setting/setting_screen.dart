@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,169 +33,220 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(child: _buildHeader(context)),
-            SliverToBoxAdapter(
-                child: _buildSection(
-              'Image Processing',
-              Icons.image_rounded,
-              AppTheme.accentPurple,
-              [
-                _ToggleSetting(
-                  label: 'Auto-save edits',
-                  subtitle: 'Save a copy after every edit',
-                  value: _autoSave,
-                  icon: Icons.save_outlined,
-                  onChanged: (v) => setState(() => _autoSave = v),
-                ),
-                _ToggleSetting(
-                  label: 'AI Enhancement',
-                  subtitle: 'Use AI for smart suggestions',
-                  value: _aiEnhancement,
-                  icon: Icons.auto_awesome_outlined,
-                  onChanged: (v) => setState(() => _aiEnhancement = v),
-                ),
-                _ToggleSetting(
-                  label: 'Save Original',
-                  subtitle: 'Keep original alongside edited',
-                  value: _saveOriginal,
-                  icon: Icons.photo_library_outlined,
-                  onChanged: (v) => setState(() => _saveOriginal = v),
-                ),
-                _ToggleSetting(
-                  label: 'High Quality Export',
-                  subtitle: 'Larger file sizes, max quality',
-                  value: _highQualityExport,
-                  icon: Icons.high_quality_rounded,
-                  onChanged: (v) => setState(() => _highQualityExport = v),
-                ),
+      body: Stack(
+        children: [
+          // Background
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: AppTheme.surfaceGradient,
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(child: Gap(80)), // Header space
+                SliverToBoxAdapter(
+                    child: _buildSection(
+                  'Image Processing',
+                  Icons.image_rounded,
+                  AppTheme.accentSecondary,
+                  [
+                    _ToggleSetting(
+                      label: 'Auto-save edits',
+                      subtitle: 'Save a copy after every edit',
+                      value: _autoSave,
+                      icon: Icons.save_outlined,
+                      onChanged: (v) => setState(() => _autoSave = v),
+                    ),
+                    _ToggleSetting(
+                      label: 'AI Enhancement',
+                      subtitle: 'Use AI for smart suggestions',
+                      value: _aiEnhancement,
+                      icon: Icons.auto_awesome_outlined,
+                      onChanged: (v) => setState(() => _aiEnhancement = v),
+                    ),
+                    _ToggleSetting(
+                      label: 'Save Original',
+                      subtitle: 'Keep original alongside edited',
+                      value: _saveOriginal,
+                      icon: Icons.photo_library_outlined,
+                      onChanged: (v) => setState(() => _saveOriginal = v),
+                    ),
+                    _ToggleSetting(
+                      label: 'High Quality Export',
+                      subtitle: 'Larger file sizes, max quality',
+                      value: _highQualityExport,
+                      icon: Icons.high_quality_rounded,
+                      onChanged: (v) => setState(() => _highQualityExport = v),
+                    ),
+                  ],
+                )),
+                SliverToBoxAdapter(
+                    child: _buildSection(
+                  'Export Settings',
+                  Icons.file_upload_outlined,
+                  AppTheme.accentTertiary,
+                  [
+                    _DropdownSetting(
+                      label: 'Export Format',
+                      icon: Icons.image_outlined,
+                      value: _exportFormat,
+                      options: ['JPEG', 'PNG', 'HEIC', 'WEBP'],
+                      onChanged: (v) => setState(() => _exportFormat = v!),
+                    ),
+                    _DropdownSetting(
+                      label: 'Export Quality',
+                      icon: Icons.high_quality_outlined,
+                      value: _exportQuality,
+                      options: ['Low', 'Medium', 'High', 'Maximum'],
+                      onChanged: (v) => setState(() => _exportQuality = v!),
+                    ),
+                    _DropdownSetting(
+                      label: 'Default Filter',
+                      icon: Icons.auto_fix_high_outlined,
+                      value: _defaultFilter,
+                      options: ['Original', 'Sepia', 'Vintage', 'Cool', 'Warm'],
+                      onChanged: (v) => setState(() => _defaultFilter = v!),
+                    ),
+                    _ToggleSetting(
+                      label: 'Add Watermark',
+                      subtitle: 'Add SnapCraft branding on export',
+                      value: _showWatermark,
+                      icon: Icons.branding_watermark_outlined,
+                      onChanged: (v) => setState(() => _showWatermark = v),
+                    ),
+                  ],
+                )),
+                SliverToBoxAdapter(
+                    child: _buildSection(
+                  'App Settings',
+                  Icons.phone_android_rounded,
+                  AppTheme.accent,
+                  [
+                    _ToggleSetting(
+                      label: 'Dark Mode',
+                      subtitle: 'System-wide dark appearance',
+                      value: _darkMode,
+                      icon: Icons.dark_mode_outlined,
+                      onChanged: (v) => setState(() => _darkMode = v),
+                    ),
+                    _ToggleSetting(
+                      label: 'Haptic Feedback',
+                      subtitle: 'Vibrate on interactions',
+                      value: _hapticFeedback,
+                      icon: Icons.vibration_rounded,
+                      onChanged: (v) => setState(() => _hapticFeedback = v),
+                    ),
+                    _ToggleSetting(
+                      label: 'Analytics',
+                      subtitle: 'Help improve SnapCraft',
+                      value: _analyticsEnabled,
+                      icon: Icons.bar_chart_rounded,
+                      onChanged: (v) => setState(() => _analyticsEnabled = v),
+                    ),
+                  ],
+                )),
+                SliverToBoxAdapter(
+                    child: _buildSection(
+                  'Storage',
+                  Icons.storage_rounded,
+                  const Color(0xFF3DDC84),
+                  [
+                    _ActionSetting(
+                      label: 'Clear Cache',
+                      subtitle: '47.2 MB used',
+                      icon: Icons.cleaning_services_rounded,
+                      iconColor: Colors.orange,
+                      actionLabel: 'Clear',
+                      onTap: () => _showClearCacheDialog(),
+                    ),
+                    _ActionSetting(
+                      label: 'Clear All Edits',
+                      subtitle: '234 edited files',
+                      icon: Icons.delete_sweep_rounded,
+                      iconColor: Colors.red,
+                      actionLabel: 'Delete',
+                      onTap: () {},
+                    ),
+                  ],
+                )),
+                SliverToBoxAdapter(child: _buildVersionInfo()),
+                const SliverToBoxAdapter(child: Gap(100)),
               ],
-            )),
-            SliverToBoxAdapter(
-                child: _buildSection(
-              'Export Settings',
-              Icons.file_upload_outlined,
-              AppTheme.accentBlue,
-              [
-                _DropdownSetting(
-                  label: 'Export Format',
-                  icon: Icons.image_outlined,
-                  value: _exportFormat,
-                  options: ['JPEG', 'PNG', 'HEIC', 'WEBP'],
-                  onChanged: (v) => setState(() => _exportFormat = v!),
-                ),
-                _DropdownSetting(
-                  label: 'Export Quality',
-                  icon: Icons.high_quality_outlined,
-                  value: _exportQuality,
-                  options: ['Low', 'Medium', 'High', 'Maximum'],
-                  onChanged: (v) => setState(() => _exportQuality = v!),
-                ),
-                _DropdownSetting(
-                  label: 'Default Filter',
-                  icon: Icons.auto_fix_high_outlined,
-                  value: _defaultFilter,
-                  options: ['Original', 'Sepia', 'Vintage', 'Cool', 'Warm'],
-                  onChanged: (v) => setState(() => _defaultFilter = v!),
-                ),
-                _ToggleSetting(
-                  label: 'Add Watermark',
-                  subtitle: 'Add SnapCraft branding on export',
-                  value: _showWatermark,
-                  icon: Icons.branding_watermark_outlined,
-                  onChanged: (v) => setState(() => _showWatermark = v),
-                ),
-              ],
-            )),
-            SliverToBoxAdapter(
-                child: _buildSection(
-              'App Settings',
-              Icons.phone_android_rounded,
-              AppTheme.accent,
-              [
-                _ToggleSetting(
-                  label: 'Dark Mode',
-                  subtitle: 'System-wide dark appearance',
-                  value: _darkMode,
-                  icon: Icons.dark_mode_outlined,
-                  onChanged: (v) => setState(() => _darkMode = v),
-                ),
-                _ToggleSetting(
-                  label: 'Haptic Feedback',
-                  subtitle: 'Vibrate on interactions',
-                  value: _hapticFeedback,
-                  icon: Icons.vibration_rounded,
-                  onChanged: (v) => setState(() => _hapticFeedback = v),
-                ),
-                _ToggleSetting(
-                  label: 'Analytics',
-                  subtitle: 'Help improve SnapCraft',
-                  value: _analyticsEnabled,
-                  icon: Icons.bar_chart_rounded,
-                  onChanged: (v) => setState(() => _analyticsEnabled = v),
-                ),
-              ],
-            )),
-            SliverToBoxAdapter(
-                child: _buildSection(
-              'Storage',
-              Icons.storage_rounded,
-              const Color(0xFF3DDC84),
-              [
-                _ActionSetting(
-                  label: 'Clear Cache',
-                  subtitle: '47.2 MB used',
-                  icon: Icons.cleaning_services_rounded,
-                  iconColor: Colors.orange,
-                  actionLabel: 'Clear',
-                  onTap: () => _showClearCacheDialog(),
-                ),
-                _ActionSetting(
-                  label: 'Clear All Edits',
-                  subtitle: '234 edited files',
-                  icon: Icons.delete_sweep_rounded,
-                  iconColor: Colors.red,
-                  actionLabel: 'Delete',
-                  onTap: () {},
-                ),
-              ],
-            )),
-            SliverToBoxAdapter(child: _buildVersionInfo()),
-            const SliverToBoxAdapter(child: Gap(100)),
-          ],
-        ),
+            ),
+          ),
+
+          // Header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildHeader(context),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 0.5),
+    return Container(
+      padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 12,
+          left: 20,
+          right: 20,
+          bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        boxShadow: AppTheme.shadowSm,
+        border: Border(bottom: BorderSide(color: AppTheme.border, width: 1)),
+      ),
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.border, width: 1),
+                  ),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: AppTheme.text1, size: 18),
+                ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: AppTheme.text2, size: 16),
-            ),
+              const Gap(16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Settings',
+                    style: GoogleFonts.syne(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.text1,
+                    ),
+                  ),
+                  Text(
+                    'Preferences & Account',
+                    style: GoogleFonts.dmSans(
+                      fontSize: 12,
+                      color: AppTheme.text2,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const Gap(12),
-          GradientText(
-            'Settings',
-            gradient: AppTheme.brandGradient,
-            style: GoogleFonts.syne(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -334,7 +387,8 @@ class _ToggleSetting extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon,
-              color: value ? AppTheme.accentPurple : AppTheme.text3, size: 20),
+              color: value ? AppTheme.accentSecondary : AppTheme.text3,
+              size: 20),
           const Gap(14),
           Expanded(
             child: Column(
@@ -357,7 +411,7 @@ class _ToggleSetting extends StatelessWidget {
           CupertinoSwitch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.accentPurple,
+            activeColor: AppTheme.accentSecondary,
           ),
         ],
       ),
@@ -386,7 +440,7 @@ class _DropdownSetting extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppTheme.accentBlue, size: 20),
+          Icon(icon, color: AppTheme.accentTertiary, size: 20),
           const Gap(14),
           Expanded(
             child: Text(label,
@@ -399,8 +453,8 @@ class _DropdownSetting extends StatelessWidget {
             underline: const SizedBox.shrink(),
             icon: const Icon(Icons.keyboard_arrow_down_rounded,
                 color: AppTheme.text3, size: 18),
-            style:
-                GoogleFonts.dmSans(fontSize: 13, color: AppTheme.accentPurple),
+            style: GoogleFonts.dmSans(
+                fontSize: 13, color: AppTheme.accentSecondary),
             items: options
                 .map((o) => DropdownMenuItem(
                       value: o,

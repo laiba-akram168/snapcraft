@@ -70,54 +70,72 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
   }
 
   Widget _buildTopBar(BuildContext context, EditorState state) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       child: Row(
         children: [
-          GestureDetector(
+          _TopBtn(
+            icon: Icons.close_rounded,
             onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 0.5),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: AppTheme.text2, size: 16),
+            color: AppTheme.text1.withOpacity(0.05),
+          ),
+          const Gap(16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'PHOTO EDITOR',
+                  style: GoogleFonts.syne(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.accent,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                Text(
+                  state.processedImage != null ? 'Edit Image' : 'Import Photo',
+                  style: GoogleFonts.syne(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.text1,
+                  ),
+                ),
+              ],
             ),
           ),
-          const Gap(12),
-          GradientText(
-            'Editor',
-            gradient: AppTheme.brandGradient,
-            style: GoogleFonts.syne(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const Spacer(),
           if (state.canUndo)
             _TopBtn(
-                icon: Icons.undo_rounded,
-                onTap: () => ref.read(editorProvider.notifier).undo()),
+              icon: Icons.undo_rounded,
+              onTap: () => ref.read(editorProvider.notifier).undo(),
+            ),
           const Gap(8),
           if (state.canRedo)
             _TopBtn(
-                icon: Icons.redo_rounded,
-                onTap: () => ref.read(editorProvider.notifier).redo()),
-          const Gap(8),
+              icon: Icons.redo_rounded,
+              onTap: () => ref.read(editorProvider.notifier).redo(),
+            ),
+          const Gap(12),
           GestureDetector(
             onTap: () => ref.read(editorProvider.notifier).exportImage(context),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                gradient: AppTheme.accentGradient,
-                borderRadius: BorderRadius.circular(10),
+                gradient: AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Text(
                 'Export',
                 style: GoogleFonts.dmSans(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white),
               ),
             ),
@@ -129,11 +147,18 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
 
   Widget _buildCanvas(EditorState state) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border, width: 0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: AppTheme.border, width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
       child: state.processedImage != null
@@ -231,42 +256,58 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
   }
 
   Widget _buildToolTabs() {
-    final tabs = ['Filters', 'Adjust', 'Crop', 'More'];
+    final tabs = ['Filters', 'Adjust', 'Crop', 'Tools'];
     final icons = [
       Icons.auto_awesome_rounded,
       Icons.tune_rounded,
       Icons.crop_rounded,
-      Icons.more_horiz_rounded,
+      Icons.auto_fix_normal_rounded,
     ];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      height: 54,
       decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.border, width: 0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+        border: Border.all(color: AppTheme.border, width: 1),
       ),
       child: TabBar(
         controller: _toolTabController,
         indicator: BoxDecoration(
-          gradient: AppTheme.accentGradient,
-          borderRadius: BorderRadius.circular(12),
+          gradient: AppTheme.brandGradient,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.accent.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
+        padding: const EdgeInsets.all(4),
         labelStyle:
-            GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: GoogleFonts.dmSans(fontSize: 12),
+            GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w500),
         labelColor: Colors.white,
-        unselectedLabelColor: AppTheme.text3,
+        unselectedLabelColor: AppTheme.text2,
         tabs: List.generate(
             4,
             (i) => Tab(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(icons[i], size: 14),
-                      const Gap(4),
+                      Icon(icons[i], size: 16),
+                      const Gap(6),
                       Text(tabs[i]),
                     ],
                   ),
@@ -292,7 +333,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
 
   Widget _buildBottomActions(EditorState state) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       child: Row(
         children: [
           Expanded(
@@ -300,16 +341,16 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
               icon: Icons.auto_fix_high_rounded,
               label: 'AI Enhance',
               gradient: const LinearGradient(
-                  colors: [Color(0xFFC77DFF), Color(0xFF7B2FBE)]),
+                  colors: [Color(0xFF6366F1), Color(0xFF4F46E5)]),
               onTap: () => ref.read(editorProvider.notifier).aiEnhance(),
             ),
           ),
-          const Gap(10),
+          const Gap(12),
           Expanded(
             child: _ActionBtn(
               icon: Icons.save_alt_rounded,
-              label: 'Save',
-              gradient: AppTheme.accentGradient,
+              label: 'Save Gallery',
+              gradient: AppTheme.brandGradient,
               onTap: () => ref.read(editorProvider.notifier).saveImage(context),
             ),
           ),
@@ -484,7 +525,7 @@ class _MorePanel extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(tools[i].$2, color: AppTheme.accentPurple, size: 24),
+              Icon(tools[i].$2, color: AppTheme.accentSecondary, size: 24),
               const Gap(6),
               Text(tools[i].$1,
                   style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.text2)),
@@ -539,21 +580,29 @@ class _HistogramPainter extends CustomPainter {
 class _TopBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  const _TopBtn({required this.icon, required this.onTap});
+  final Color? color;
+  const _TopBtn({required this.icon, required this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 36,
-        height: 36,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
-          color: AppTheme.card,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppTheme.border, width: 0.5),
+          color: color ?? Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.border, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
-        child: Icon(icon, color: AppTheme.text2, size: 18),
+        child: Icon(icon, color: AppTheme.text1, size: 20),
       ),
     );
   }
@@ -577,21 +626,28 @@ class _ActionBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.colors.first.withOpacity(0.25),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            )
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const Gap(8),
+            Icon(icon, color: Colors.white, size: 20),
+            const Gap(10),
             Text(
               label,
               style: GoogleFonts.dmSans(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white),
             ),
           ],

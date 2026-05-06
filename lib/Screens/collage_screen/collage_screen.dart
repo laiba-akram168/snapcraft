@@ -48,10 +48,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
   Future<void> _addImage(int slotIndex) async {
     final result = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: AppTheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => _ImageSourceSheet(),
     );
     if (result == null) return;
@@ -71,103 +68,188 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            _buildLayoutPicker(),
-            const Gap(8),
-            Expanded(child: _buildCollageCanvas(state, layout)),
-            _buildRatioSelector(),
-            _buildBottomBar(state),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
+      body: Stack(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+          // Background Gradient
+          Positioned.fill(
             child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 0.5),
+              decoration: const BoxDecoration(
+                gradient: AppTheme.surfaceGradient,
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: AppTheme.text2, size: 16),
             ),
           ),
-          const Gap(12),
-          GradientText(
-            'Collage',
-            gradient: AppTheme.brandGradient,
-            style: GoogleFonts.syne(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => ref.read(collageProvider.notifier).clearAll(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 0.5),
-              ),
-              child: Text('Clear',
-                  style:
-                      GoogleFonts.dmSans(fontSize: 13, color: AppTheme.text2)),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const Gap(80), // Space for floating header
+                _buildLayoutPicker(),
+                const Gap(16),
+                Expanded(child: _buildCollageCanvas(state, layout)),
+                const Gap(16),
+                _buildRatioSelector(),
+                _buildBottomBar(state),
+              ],
             ),
           ),
-          const Gap(8),
-          GestureDetector(
-            onTap: _exportCollage,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: AppTheme.accentGradient,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                'Export',
-                style: GoogleFonts.dmSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
-              ),
-            ),
+
+          // Floating Header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildHeader(context),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.accent.withOpacity(0.08),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded,
+                          color: AppTheme.text1, size: 20),
+                    ),
+                  ),
+                  const Gap(16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Collage',
+                          style: GoogleFonts.syne(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.text1,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          'Create your story',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 11,
+                            color: AppTheme.text2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => ref.read(collageProvider.notifier).clearAll(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                      ),
+                      child: Text(
+                        'Clear',
+                        style: GoogleFonts.syne(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.text2,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(10),
+                  GestureDetector(
+                    onTap: _exportCollage,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.brandGradient,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.accent.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'Export',
+                        style: GoogleFonts.syne(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _exportCollage() async {
     try {
-      final boundary = _collageKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary = _collageKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       if (boundary == null) return;
-      
+
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/snapcraft_collage_${DateTime.now().millisecondsSinceEpoch}.png');
+      final file = File(
+          '${dir.path}/snapcraft_collage_${DateTime.now().millisecondsSinceEpoch}.png');
       await file.writeAsBytes(pngBytes);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Collage saved to gallery!'),
-            backgroundColor: AppTheme.success,
+            content: Text(
+              'Collage saved successfully!',
+              style: GoogleFonts.dmSans(fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: AppTheme.accentSecondary,
             behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -181,52 +263,79 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
   }
 
   Widget _buildLayoutPicker() {
-    return SizedBox(
-      height: 80,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _layouts.length,
-        itemBuilder: (_, i) {
-          final isSelected = i == _selectedLayout;
-          return GestureDetector(
-            onTap: () {
-              setState(() => _selectedLayout = i);
-              ref.read(collageProvider.notifier).setLayout(_layouts[i]);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 64,
-              margin: const EdgeInsets.only(right: 10),
-              decoration: BoxDecoration(
-                gradient: isSelected ? AppTheme.accentGradient : null,
-                color: isSelected ? null : AppTheme.card,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isSelected ? Colors.transparent : AppTheme.border,
-                  width: 0.5,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(_layouts[i].icon,
-                      color: isSelected ? Colors.white : AppTheme.text3,
-                      size: 22),
-                  const Gap(5),
-                  Text(_layouts[i].name,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 10,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Text(
+            'CHOOSE LAYOUT',
+            style: GoogleFonts.syne(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.text2,
+                letterSpacing: 1.5),
+          ),
+        ),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _layouts.length,
+            itemBuilder: (_, i) {
+              final isSelected = i == _selectedLayout;
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _selectedLayout = i);
+                  ref.read(collageProvider.notifier).setLayout(_layouts[i]);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  width: 84,
+                  margin: const EdgeInsets.only(right: 14),
+                  decoration: BoxDecoration(
+                    gradient: isSelected ? AppTheme.brandGradient : null,
+                    color: isSelected ? null : Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: isSelected ? Colors.transparent : AppTheme.border,
+                      width: 1,
+                    ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: AppTheme.accent.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      )
+                    ] : null,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _layouts[i].icon,
                         color: isSelected ? Colors.white : AppTheme.text2,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w400,
-                      )),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                        size: 26,
+                      ),
+                      const Gap(8),
+                      Text(
+                        _layouts[i].name,
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: isSelected ? Colors.white : AppTheme.text2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -238,7 +347,6 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
       child: _buildLayoutGrid(layout, totalSlots, state),
     );
 
-    // Tightly wrap the collage in the boundary to prevent exporting empty UI space
     Widget boundaryContent = RepaintBoundary(
       key: _collageKey,
       child: innerContent,
@@ -246,14 +354,22 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
 
     Widget finalContent = boundaryContent;
 
-    // Apply aspect ratio if not 'Free'
     if (_selectedRatio != 'Free') {
       double ratioValue = 1.0;
       switch (_selectedRatio) {
-        case '4:5': ratioValue = 4 / 5; break;
-        case '9:16': ratioValue = 9 / 16; break;
-        case '16:9': ratioValue = 16 / 9; break;
-        case '1:1': default: ratioValue = 1.0; break;
+        case '4:5':
+          ratioValue = 4 / 5;
+          break;
+        case '9:16':
+          ratioValue = 9 / 16;
+          break;
+        case '16:9':
+          ratioValue = 16 / 9;
+          break;
+        case '1:1':
+        default:
+          ratioValue = 1.0;
+          break;
       }
       finalContent = Center(
         child: AspectRatio(
@@ -264,11 +380,18 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border, width: 0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(36),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 35,
+            offset: const Offset(0, 15),
+          ),
+        ],
+        border: Border.all(color: AppTheme.border, width: 2),
       ),
       clipBehavior: Clip.antiAlias,
       child: finalContent,
@@ -284,9 +407,9 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: layout.cols,
-        childAspectRatio: layout.id == 3 ? 2.0 : 1.0,
-        crossAxisSpacing: 2,
-        mainAxisSpacing: 2,
+        childAspectRatio: layout.id == 3 ? 0.7 : 1.0,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
       ),
       itemCount: totalSlots,
       itemBuilder: (_, i) => _CollageSlot(
@@ -354,39 +477,65 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
   }
 
   Widget _buildRatioSelector() {
-    final ratios = ['Free', '1:1', '4:5', '9:16', '16:9'];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
-        children: [
-          Text('Canvas ratio',
-              style: GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2)),
-          const Spacer(),
-          ...ratios.map((r) => GestureDetector(
+    final ratios = ['1:1', '4:5', '9:16', '16:9'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Text(
+            'ASPECT RATIO',
+            style: GoogleFonts.syne(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.text2,
+                letterSpacing: 1.5),
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: ratios.map((r) {
+              final isSelected = r == _selectedRatio;
+              return GestureDetector(
                 onTap: () => setState(() => _selectedRatio = r),
-                child: Container(
-                  margin: const EdgeInsets.only(left: 6),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  margin: const EdgeInsets.only(right: 10),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
-                    color: r == _selectedRatio
-                        ? AppTheme.accent.withOpacity(0.15)
-                        : AppTheme.card,
-                    borderRadius: BorderRadius.circular(8),
+                    gradient: isSelected ? AppTheme.brandGradient : null,
+                    color: isSelected ? null : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: AppTheme.accent.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ] : null,
                     border: Border.all(
-                      color: r == _selectedRatio ? AppTheme.accent : AppTheme.border,
-                      width: 0.5,
+                      color: isSelected ? Colors.transparent : AppTheme.border,
+                      width: 1,
                     ),
                   ),
-                  child: Text(r,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 11,
-                        color: r == _selectedRatio ? AppTheme.accent : AppTheme.text2,
-                      )),
+                  child: Text(
+                    r,
+                    style: GoogleFonts.syne(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: isSelected ? Colors.white : AppTheme.text1,
+                    ),
+                  ),
                 ),
-              )),
-        ],
-      ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -411,7 +560,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
                 child: Text(
                   'Auto-fill from gallery',
                   style: GoogleFonts.dmSans(
-                      fontSize: 12, color: AppTheme.accentPurple),
+                      fontSize: 12, color: AppTheme.accentSecondary),
                 ),
               ),
             ],
@@ -428,7 +577,7 @@ class _CollageScreenState extends ConsumerState<CollageScreen>
                 Colors.black,
                 Colors.white,
                 const Color(0xFF1C1C26),
-                AppTheme.accentPurple.withOpacity(0.3)
+                AppTheme.accentSecondary.withOpacity(0.3)
               ].map(
                 (c) => GestureDetector(
                   onTap: () =>
@@ -474,20 +623,41 @@ class _CollageSlot extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Image.file(imageFile!, fit: BoxFit.cover),
+          // Gradient overlay for the close button
           Positioned(
-            top: 6,
-            right: 6,
+            top: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Colors.black.withOpacity(0.3),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
             child: GestureDetector(
               onTap: onRemove,
               child: Container(
-                width: 22,
-                height: 22,
+                padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: Colors.black54,
+                  color: Colors.white,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black12, blurRadius: 4, spreadRadius: 1)
+                  ],
                 ),
                 child: const Icon(Icons.close_rounded,
-                    color: Colors.white, size: 14),
+                    color: AppTheme.error, size: 14),
               ),
             ),
           ),
@@ -497,25 +667,40 @@ class _CollageSlot extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(0),
-        color: AppTheme.text3,
-        strokeWidth: 1,
-        dashPattern: const [6, 4],
-        child: Container(
-          color: AppTheme.surface,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_photo_alternate_outlined,
-                  color: AppTheme.text3, size: 26),
-              const Gap(6),
-              Text(
-                'Add photo',
-                style: GoogleFonts.dmSans(fontSize: 11, color: AppTheme.text3),
-              ),
-            ],
+      child: Container(
+        color: const Color(0xFFFBF9F8),
+        child: DottedBorder(
+          borderType: BorderType.RRect,
+          radius: const Radius.circular(0),
+          color: AppTheme.border,
+          strokeWidth: 2,
+          dashPattern: const [8, 6],
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: AppTheme.shadowSm,
+                  ),
+                  child: const Icon(Icons.add_rounded,
+                      color: AppTheme.accent, size: 24),
+                ),
+                const Gap(10),
+                Text(
+                  'ADD PHOTO',
+                  style: GoogleFonts.syne(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.text2,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

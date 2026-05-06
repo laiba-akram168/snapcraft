@@ -150,7 +150,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   spreadRadius: 20,
                                 ),
                                 BoxShadow(
-                                  color: AppTheme.accentPurple
+                                  color: AppTheme.accentSecondary
                                       .withOpacity(0.1 * _glowAnim.value),
                                   blurRadius: 80,
                                   spreadRadius: 30,
@@ -166,7 +166,7 @@ class _SplashScreenState extends State<SplashScreen>
                               gradient: const LinearGradient(
                                 colors: [
                                   AppTheme.accent,
-                                  AppTheme.accentPurple
+                                  AppTheme.accentSecondary
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -206,7 +206,7 @@ class _SplashScreenState extends State<SplashScreen>
                           ShaderMask(
                             blendMode: BlendMode.srcIn,
                             shaderCallback: (bounds) => const LinearGradient(
-                              colors: [AppTheme.accent, AppTheme.accentPurple],
+                              colors: [AppTheme.accent, AppTheme.accentSecondary],
                             ).createShader(Rect.fromLTWH(
                                 0, 0, bounds.width, bounds.height)),
                             child: Text(
@@ -284,7 +284,7 @@ class _SplashScreenState extends State<SplashScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.accentPurple.withOpacity(0.08 * _glowAnim.value),
+                    AppTheme.accentSecondary.withOpacity(0.08 * _glowAnim.value),
                     Colors.transparent,
                   ],
                 ),
@@ -378,7 +378,7 @@ class _LoaderPainter extends CustomPainter {
     if (trackEnd > trackStart) {
       final fgPaint = Paint()
         ..shader = const LinearGradient(
-          colors: [AppTheme.accent, AppTheme.accentPurple],
+          colors: [AppTheme.accent, AppTheme.accentSecondary],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 3
@@ -420,7 +420,7 @@ class _ParticlePainter extends CustomPainter {
       final y = (p.y - dy) % 1.0;
 
       final paint = Paint()
-        ..color = (p.x > 0.5 ? AppTheme.accentPurple : AppTheme.accent)
+        ..color = (p.x > 0.5 ? AppTheme.accentSecondary : AppTheme.accent)
             .withOpacity(p.opacity)
         ..style = PaintingStyle.fill;
 

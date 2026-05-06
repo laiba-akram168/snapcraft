@@ -141,15 +141,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           child: GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/settings'),
             child: Container(
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 0.5),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: AppTheme.shadowSm,
+                border: Border.all(color: AppTheme.border, width: 1),
               ),
               child: const Icon(Icons.settings_outlined,
-                  color: AppTheme.text2, size: 18),
+                  color: AppTheme.text1, size: 20),
             ),
           ),
         ),
@@ -157,11 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF1A0A2E), AppTheme.bg],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+            gradient: AppTheme.surfaceGradient,
           ),
           child: SafeArea(
             child: Column(
@@ -177,29 +174,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       GestureDetector(
                         onTap: _updateAvatar,
                         child: Container(
-                          width: 92,
-                          height: 92,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: _avatarPath != null 
                               ? DecorationImage(image: FileImage(File(_avatarPath!)), fit: BoxFit.cover)
                               : null,
-                            gradient: _avatarPath == null ? const LinearGradient(
-                              colors: [AppTheme.accent, AppTheme.accentPurple],
-                            ) : null,
+                            gradient: _avatarPath == null ? AppTheme.brandGradient : null,
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.accentPurple.withOpacity(0.35),
+                                color: AppTheme.accent.withOpacity(0.3),
                                 blurRadius: 24,
-                                offset: const Offset(0, 6),
+                                offset: const Offset(0, 8),
                               ),
                             ],
+                            border: Border.all(color: Colors.white, width: 4),
                           ),
                           child: _avatarPath == null ? Center(
                             child: Text(_userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
                                 style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w800,
                                   color: Colors.white,
                                 )),
                           ) : null,
@@ -212,50 +208,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         child: GestureDetector(
                           onTap: _updateAvatar,
                           child: Container(
-                            width: 28,
-                            height: 28,
+                            width: 32,
+                            height: 32,
                             decoration: BoxDecoration(
-                              color: AppTheme.accentPurple,
+                              gradient: AppTheme.brandGradient,
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppTheme.bg, width: 2),
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: AppTheme.shadowSm,
                             ),
-                            child: const Icon(Icons.edit_rounded,
-                                color: Colors.white, size: 13),
+                            child: const Icon(Icons.camera_alt_rounded,
+                                color: Colors.white, size: 14),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Gap(14),
+                const Gap(16),
                 Text(
                   _userName,
-                  style: GoogleFonts.syne(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.text1),
+                  style: Theme.of(context).textTheme.displayMedium,
                 ),
                 const Gap(4),
                 Text(
                   _userEmail,
-                  style:
-                      GoogleFonts.dmSans(fontSize: 13, color: AppTheme.text2),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const Gap(10),
+                const Gap(12),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [AppTheme.accent, AppTheme.accentPurple]),
+                    gradient: AppTheme.brandGradient,
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: AppTheme.shadowSm,
                   ),
                   child: Text(
-                    '✨ Pro Member',
+                    '✨ PRO MEMBER',
                     style: GoogleFonts.syne(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 1),
                   ),
                 ),
               ],
@@ -278,43 +272,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
     final stats = [
       ('Photos\nEdited', '$photosEdited'),
-      ('Filters\nUsed', '24'), // Mock dynamic logic
+      ('Filters\nUsed', '24'), 
       ('Collages\nMade', '$collagesMade'),
-      ('AI\nEnhanced', '12'),  // Mock dynamic logic
+      ('AI\nMagic', '12'),  
     ];
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.border, width: 0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: AppTheme.shadowSm,
+        border: Border.all(color: AppTheme.border, width: 1),
       ),
       child: Row(
         children: stats
             .map((s) => Expanded(
                   child: Column(
                     children: [
-                      ShaderMask(
-                        blendMode: BlendMode.srcIn,
-                        shaderCallback: (bounds) =>
-                            AppTheme.brandGradient.createShader(
-                          Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                        ),
-                        child: Text(
-                          s.$2,
-                          style: GoogleFonts.syne(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white),
+                      Text(
+                        s.$2,
+                        style: GoogleFonts.syne(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.text1,
                         ),
                       ),
-                      const Gap(4),
+                      const Gap(6),
                       Text(
                         s.$1,
                         style: GoogleFonts.dmSans(
-                            fontSize: 10, color: AppTheme.text2, height: 1.4),
+                            fontSize: 10, color: AppTheme.text2, height: 1.4, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -327,70 +316,66 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildAchievements() {
     final badges = [
-      ('🔥', 'Hot Streak', '7 days'),
+      ('🔥', 'Streak', '7 days'),
       ('🎨', 'Artist', '50 edits'),
-      ('⚡', 'AI Power', '25 AI'),
-      ('🏆', 'Pro', 'Upgrade'),
-      ('📸', 'Sharpshooter', '100 photos'),
+      ('⚡', 'Magic', '25 AI'),
+      ('🏆', 'Legend', 'Top 1%'),
+      ('📸', 'Pro', 'Active'),
     ];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Achievements',
-            style: GoogleFonts.syne(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.text1),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          const Gap(12),
+          const Gap(16),
           SizedBox(
-            height: 86,
+            height: 100,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: badges.length,
               itemBuilder: (_, i) {
-                final isLocked = i == 3;
+                final isSpecial = i == 0 || i == 3;
                 return Container(
-                  width: 74,
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.all(10),
+                  width: 90,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isLocked ? AppTheme.surface : AppTheme.card,
-                    borderRadius: BorderRadius.circular(14),
+                    color: isSpecial ? AppTheme.accent.withOpacity(0.05) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: AppTheme.shadowSm,
                     border: Border.all(
-                      color: isLocked
-                          ? AppTheme.border
-                          : AppTheme.accentPurple.withOpacity(0.3),
-                      width: 0.5,
+                      color: isSpecial ? AppTheme.accent.withOpacity(0.2) : AppTheme.border,
+                      width: 1,
                     ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        isLocked ? '🔒' : badges[i].$1,
-                        style: const TextStyle(fontSize: 22),
+                        badges[i].$1,
+                        style: const TextStyle(fontSize: 24),
                       ),
-                      const Gap(4),
+                      const Gap(6),
                       Text(
                         badges[i].$2,
                         style: GoogleFonts.dmSans(
-                          fontSize: 9,
-                          color: isLocked ? AppTheme.text3 : AppTheme.text2,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.text1,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         badges[i].$3,
-                        style: GoogleFonts.syne(
+                        style: GoogleFonts.dmSans(
                           fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              isLocked ? AppTheme.text3 : AppTheme.accentPurple,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.text2,
                         ),
                       ),
                     ],
@@ -406,7 +391,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildMenuSection(String title, List<_MenuItem> items) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -414,15 +399,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             title,
             style: GoogleFonts.syne(
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.text2),
+                fontWeight: FontWeight.w700,
+                color: AppTheme.text2,
+                letterSpacing: 0.5),
           ),
-          const Gap(10),
+          const Gap(12),
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.border, width: 0.5),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: AppTheme.shadowSm,
+              border: Border.all(color: AppTheme.border, width: 1),
             ),
             child: Column(
               children: items.asMap().entries.map((entry) {
@@ -435,46 +422,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
+                            horizontal: 20, vertical: 16),
                         child: Row(
                           children: [
                             Container(
-                              width: 36,
-                              height: 36,
+                              width: 40,
+                              height: 40,
                               decoration: BoxDecoration(
-                                color: item.iconColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(10),
+                                color: item.iconColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(item.icon,
-                                  color: item.iconColor, size: 18),
+                                  color: item.iconColor, size: 20),
                             ),
-                            const Gap(14),
+                            const Gap(16),
                             Expanded(
                               child: Text(
                                 item.label,
                                 style: GoogleFonts.dmSans(
-                                    fontSize: 14, color: AppTheme.text1),
+                                    fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.text1),
                               ),
                             ),
                             if (item.badge != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.accent.withOpacity(0.15),
+                                  gradient: AppTheme.brandGradient,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   item.badge!,
                                   style: GoogleFonts.syne(
-                                      fontSize: 10,
-                                      color: AppTheme.accent,
-                                      fontWeight: FontWeight.w700),
+                                      fontSize: 9,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800),
                                 ),
                               ),
-                            const Gap(4),
+                            const Gap(8),
                             const Icon(Icons.chevron_right_rounded,
-                                color: AppTheme.text3, size: 18),
+                                color: AppTheme.text3, size: 20),
                           ],
                         ),
                       ),
@@ -482,9 +469,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     if (i < items.length - 1)
                       const Divider(
                           height: 0,
-                          thickness: 0.5,
+                          thickness: 1,
                           color: AppTheme.border,
-                          indent: 66),
+                          indent: 76),
                   ],
                 );
               }).toList(),
@@ -497,7 +484,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildSignOut() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GestureDetector(
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -506,22 +493,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         },
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.red.withOpacity(0.2), width: 0.5),
+            color: Colors.red.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.red.withOpacity(0.1), width: 1),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.logout_rounded, color: Colors.red, size: 18),
-              const Gap(8),
+              const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+              const Gap(10),
               Text(
                 'Sign Out',
                 style: GoogleFonts.syne(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                     color: Colors.red),
               ),
             ],
@@ -535,12 +522,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         _MenuItem(
             icon: Icons.person_outline_rounded,
             label: 'Edit Profile',
-            iconColor: AppTheme.accentPurple,
+            iconColor: AppTheme.accent,
             onTap: _editProfile),
         _MenuItem(
             icon: Icons.workspace_premium_rounded,
             label: 'Upgrade to Pro',
-            iconColor: AppTheme.accent,
+            iconColor: AppTheme.accentSecondary,
             badge: 'PRO',
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pro subscription coming soon')));
@@ -548,16 +535,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         _MenuItem(
             icon: Icons.cloud_upload_outlined,
             label: 'Cloud Backup',
-            iconColor: AppTheme.accentBlue,
+            iconColor: AppTheme.accentTertiary,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cloud backup syncing...')));
-            }),
-        _MenuItem(
-            icon: Icons.devices_rounded,
-            label: 'Connected Devices',
-            iconColor: const Color(0xFF3DDC84),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Showing connected devices')));
             }),
       ];
 
@@ -575,16 +555,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         _MenuItem(
             icon: Icons.color_lens_outlined,
             label: 'Appearance',
-            iconColor: AppTheme.accentPurple,
+            iconColor: AppTheme.accentSecondary,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Appearance settings opening...')));
-            }),
-        _MenuItem(
-            icon: Icons.storage_outlined,
-            label: 'Storage & Cache',
-            iconColor: const Color(0xFF3DDC84),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cache cleared (142MB freed)')));
             }),
       ];
 
@@ -592,7 +565,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         _MenuItem(
             icon: Icons.help_outline_rounded,
             label: 'Help Center',
-            iconColor: AppTheme.accentBlue,
+            iconColor: AppTheme.accentTertiary,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Opening Help Center')));
             }),

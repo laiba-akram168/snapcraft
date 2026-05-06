@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -52,71 +53,93 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
-        children: [
-          GradientText(
-            'Gallery',
-            gradient: AppTheme.brandGradient,
-            style: GoogleFonts.syne(fontSize: 24, fontWeight: FontWeight.w800),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.accent.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
-          const Spacer(),
-          // View mode toggle
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.card,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.border, width: 0.5),
-            ),
+        ],
+        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                _ViewModeBtn(
-                    icon: Icons.dashboard_rounded,
-                    index: 0,
-                    current: _viewMode,
-                    onTap: (i) => setState(() => _viewMode = i)),
-                _ViewModeBtn(
-                    icon: Icons.grid_on_rounded,
-                    index: 1,
-                    current: _viewMode,
-                    onTap: (i) => setState(() => _viewMode = i)),
-                _ViewModeBtn(
-                    icon: Icons.view_list_rounded,
-                    index: 2,
-                    current: _viewMode,
-                    onTap: (i) => setState(() => _viewMode = i)),
+                GradientText(
+                  'Gallery',
+                  gradient: AppTheme.brandGradient,
+                  style: GoogleFonts.syne(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      _ViewModeBtn(
+                          icon: Icons.dashboard_rounded,
+                          index: 0,
+                          current: _viewMode,
+                          onTap: (i) => setState(() => _viewMode = i)),
+                      _ViewModeBtn(
+                          icon: Icons.grid_on_rounded,
+                          index: 1,
+                          current: _viewMode,
+                          onTap: (i) => setState(() => _viewMode = i)),
+                      _ViewModeBtn(
+                          icon: Icons.view_list_rounded,
+                          index: 2,
+                          current: _viewMode,
+                          onTap: (i) => setState(() => _viewMode = i)),
+                    ],
+                  ),
+                ),
+                const Gap(10),
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _isSelecting = !_isSelecting;
+                    if (!_isSelecting) _selectedIndices.clear();
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _isSelecting
+                          ? AppTheme.accent.withOpacity(0.1)
+                          : Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _isSelecting ? AppTheme.accent.withOpacity(0.3) : Colors.white.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      _isSelecting ? 'Cancel' : 'Select',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: _isSelecting ? AppTheme.accent : AppTheme.text1,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          const Gap(8),
-          GestureDetector(
-            onTap: () => setState(() {
-              _isSelecting = !_isSelecting;
-              if (!_isSelecting) _selectedIndices.clear();
-            }),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: _isSelecting
-                    ? AppTheme.accent.withOpacity(0.15)
-                    : AppTheme.card,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: _isSelecting ? AppTheme.accent : AppTheme.border,
-                  width: 0.5,
-                ),
-              ),
-              child: Text(
-                _isSelecting ? 'Cancel' : 'Select',
-                style: GoogleFonts.dmSans(
-                  fontSize: 13,
-                  color: _isSelecting ? AppTheme.accent : AppTheme.text2,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -130,15 +153,18 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         final collagesCount = images.where((f) => f.path.toLowerCase().contains('collage') || f.path.hashCode % 3 == 0).length;
         
         return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Row(
-            children: [
-              _StatChip(label: '${images.length} Photos'),
-              const Gap(8),
-              _StatChip(label: '$editedCount Edited', color: AppTheme.accentPurple),
-              const Gap(8),
-              _StatChip(label: '$collagesCount Collages', color: AppTheme.accentBlue),
-            ],
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _StatChip(label: '${images.length} Creations'),
+                const Gap(10),
+                _StatChip(label: '$editedCount Edited', color: AppTheme.accentSecondary),
+                const Gap(10),
+                _StatChip(label: '$collagesCount Collages', color: AppTheme.accentTertiary),
+              ],
+            ),
           ),
         );
       },
@@ -267,16 +293,33 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
 
   Widget _buildSelectionBar(List<File> images) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
-        border: Border(top: BorderSide(color: AppTheme.border, width: 0.5)),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, -10),
+          )
+        ],
       ),
       child: Row(
         children: [
-          Text(
-            '${_selectedIndices.length} selected',
-            style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.text2),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${_selectedIndices.length} Selected',
+                style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w800, color: AppTheme.text1),
+              ),
+              Text(
+                'items marked',
+                style: GoogleFonts.dmSans(fontSize: 12, color: AppTheme.text2, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
           const Spacer(),
           _SelectionBtn(
@@ -287,11 +330,11 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   const SnackBar(content: Text('Sharing coming soon!')),
                 );
               }),
-          const Gap(8),
+          const Gap(10),
           _SelectionBtn(
               icon: Icons.delete_outline_rounded,
               label: 'Delete',
-              color: Colors.red,
+              color: AppTheme.error,
               onTap: () {
                 for (final index in _selectedIndices) {
                   if (index < images.length) {
@@ -308,25 +351,6 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Images deleted')),
                 );
-              }),
-          const Gap(8),
-          _SelectionBtn(
-              icon: Icons.auto_fix_high_rounded,
-              label: 'Edit',
-              color: AppTheme.accentPurple,
-              onTap: () {
-                if (_selectedIndices.length != 1) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please select exactly one image to edit')),
-                  );
-                  return;
-                }
-                final file = images[_selectedIndices.first];
-                setState(() {
-                  _isSelecting = false;
-                  _selectedIndices.clear();
-                });
-                Navigator.pushNamed(context, '/editor', arguments: {'imageFile': file});
               }),
         ],
       ),
@@ -435,13 +459,41 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = color ?? AppTheme.text2;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.withOpacity(0.3), width: 0.5),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.border, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          )
+        ],
       ),
-      child: Text(label, style: GoogleFonts.dmSans(fontSize: 11, color: c)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: c,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const Gap(8),
+          Text(
+            label, 
+            style: GoogleFonts.dmSans(
+              fontSize: 12, 
+              color: AppTheme.text1,
+              fontWeight: FontWeight.w700,
+            )
+          ),
+        ],
+      ),
     );
   }
 }
@@ -491,21 +543,28 @@ class _SelectionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? AppTheme.text2;
+    final c = color ?? AppTheme.text1;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: c.withOpacity(0.3), width: 0.5),
+          color: c.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: c.withOpacity(0.1), width: 1),
         ),
         child: Row(
           children: [
-            Icon(icon, color: c, size: 16),
-            const Gap(5),
-            Text(label, style: GoogleFonts.dmSans(fontSize: 12, color: c)),
+            Icon(icon, color: c, size: 18),
+            const Gap(8),
+            Text(
+              label, 
+              style: GoogleFonts.dmSans(
+                fontSize: 13, 
+                color: c,
+                fontWeight: FontWeight.w700,
+              )
+            ),
           ],
         ),
       ),

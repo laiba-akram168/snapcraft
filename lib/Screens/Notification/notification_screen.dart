@@ -15,7 +15,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   final List<_Notif> _notifications = [
     _Notif(
       icon: Icons.auto_awesome_rounded,
-      iconColor: AppTheme.accentPurple,
+      iconColor: AppTheme.accentSecondary,
       title: 'AI Enhancement Ready',
       body: 'Your photo has been enhanced. Check the results!',
       time: 'Just now',
@@ -39,7 +39,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     ),
     _Notif(
       icon: Icons.tips_and_updates_rounded,
-      iconColor: AppTheme.accentBlue,
+      iconColor: AppTheme.accentTertiary,
       title: 'Tip of the Day',
       body:
           'Try combining the Vintage filter with a warm tone for a film look.',
@@ -48,7 +48,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     ),
     _Notif(
       icon: Icons.grid_view_rounded,
-      iconColor: AppTheme.accentPurple,
+      iconColor: AppTheme.accentSecondary,
       title: 'Collage Exported',
       body: 'Your 2×2 collage was saved successfully.',
       time: 'Yesterday',
@@ -169,7 +169,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: Text(
               'Mark all read',
               style: GoogleFonts.dmSans(
-                  fontSize: 12, color: AppTheme.accentPurple),
+                  fontSize: 12, color: AppTheme.accentSecondary),
             ),
           ),
         ],

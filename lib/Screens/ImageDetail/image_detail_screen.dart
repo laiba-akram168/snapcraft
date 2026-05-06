@@ -194,7 +194,7 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
                           child: _ActionBtn(
                             icon: Icons.tune_rounded,
                             label: 'Edit',
-                            gradient: AppTheme.accentGradient,
+                            gradient: AppTheme.brandGradient,
                             onTap: () => Navigator.pushNamed(
                               context,
                               '/editor',
@@ -219,7 +219,7 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
                             icon: Icons.grid_view_rounded,
                             label: 'Collage',
                             gradient: const LinearGradient(
-                              colors: [AppTheme.accentBlue, Color(0xFF0077B6)],
+                              colors: [AppTheme.accentTertiary, Color(0xFF0077B6)],
                             ),
                             onTap: () =>
                                 Navigator.pushNamed(context, '/collage'),
