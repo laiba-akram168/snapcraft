@@ -130,9 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   data: (images) {
                     final filteredImages = _getFilteredImages(images);
-                    if (filteredImages.isEmpty) {
-                      return SliverToBoxAdapter(child: _buildEmptyState());
-                    }
                     return _buildMasonryGrid(filteredImages);
                   },
                 ),
@@ -490,33 +487,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return Container(
+      margin: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: AppTheme.border, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          )
+        ],
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Gap(60),
           Container(
-            padding: const EdgeInsets.all(24),
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
               color: AppTheme.accent.withOpacity(0.05),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.photo_library_outlined,
-                size: 64, color: AppTheme.accent.withOpacity(0.5)),
+            child: const Center(
+              child: Text('📸', style: TextStyle(fontSize: 48)),
+            ),
           ),
           const Gap(24),
           Text(
-            'Your gallery is empty',
+            'Start Creating Magic',
             style: GoogleFonts.syne(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
               color: AppTheme.text1,
+              letterSpacing: -0.5,
             ),
           ),
-          const Gap(8),
+          const Gap(10),
           Text(
-            'Tap the button below to start creating',
-            style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.text2),
+            'Your creative gallery is waiting.\nImport a photo to start editing.',
+            style: GoogleFonts.dmSans(
+              fontSize: 14,
+              color: AppTheme.text2,
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const Gap(24),
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/editor'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              decoration: BoxDecoration(
+                gradient: AppTheme.brandGradient,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 20),
+                  const Gap(10),
+                  Text(
+                    'Pick a Photo',
+                    style: GoogleFonts.syne(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -524,32 +576,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-Widget _buildFeaturedSection() {
-  return Container(
-    height: 180,
-    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-    child: PageView(
-      children: [
-        _FeaturedCard(
-          title: 'AI Magic Eraser',
-          subtitle: 'Remove unwanted objects instantly',
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          icon: Icons.auto_fix_high_rounded,
-        ),
-        _FeaturedCard(
-          title: 'Portrait Mode',
-          subtitle: 'AI-powered depth and bokeh',
-          gradient: AppTheme.brandGradient,
-          icon: Icons.portrait_rounded,
-        ),
-      ],
-    ),
-  );
-}
 
 class _FeaturedCard extends StatelessWidget {
   final String title;

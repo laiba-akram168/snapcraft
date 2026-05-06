@@ -136,24 +136,30 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   Widget _buildFAB() {
     return Container(
-      margin: const EdgeInsets.only(top: 36),
+      margin: const EdgeInsets.only(top: 42),
       child: GestureDetector(
         onTap: () => Navigator.pushNamed(context, '/editor'),
         child: Container(
-          width: 64,
-          height: 64,
+          width: 68,
+          height: 68,
           decoration: BoxDecoration(
             gradient: AppTheme.brandGradient,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                  color: AppTheme.accent.withOpacity(0.4),
-                  blurRadius: 25,
-                  offset: const Offset(0, 8))
+                color: AppTheme.accent.withOpacity(0.4),
+                blurRadius: 25,
+                offset: const Offset(0, 12),
+              ),
+              BoxShadow(
+                color: AppTheme.accentSecondary.withOpacity(0.2),
+                blurRadius: 40,
+                offset: const Offset(0, 15),
+              ),
             ],
-            border: Border.all(color: Colors.white, width: 2.5),
+            border: Border.all(color: Colors.white, width: 3),
           ),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 36),
         ),
       ),
     );
@@ -161,29 +167,26 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   Widget _buildBottomNav() {
     return Container(
-      height: 84,
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      height: 76,
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(32),
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 30,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 25,
             offset: const Offset(0, 10),
           ),
         ],
         border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
-          filter:
-              SystemUiOverlayStyle.light.statusBarBrightness == Brightness.light
-                  ? ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12)
-                  : ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _NavItem(
                   icon: Icons.home_rounded,
@@ -200,7 +203,7 @@ class _MainShellState extends ConsumerState<MainShell> {
               const Gap(60),
               _NavItem(
                   icon: Icons.auto_awesome_rounded,
-                  label: 'Magic AI',
+                  label: 'Magic',
                   index: 3,
                   current: _currentIndex,
                   onTap: _onTap),
@@ -241,39 +244,33 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppTheme.accent.withOpacity(0.05) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
               color:
-                  isActive ? AppTheme.accent : AppTheme.text3.withOpacity(0.5),
-              size: 22,
+                  isActive ? AppTheme.accent : AppTheme.text3.withOpacity(0.6),
+              size: 24,
             ),
-            const Gap(4),
+            const Gap(2),
             Text(
               label,
               style: GoogleFonts.dmSans(
-                fontSize: 10,
+                fontSize: 9,
                 color: isActive
                     ? AppTheme.accent
-                    : AppTheme.text3.withOpacity(0.5),
-                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                    : AppTheme.text3.withOpacity(0.6),
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
               ),
             ),
-            if (isActive) ...[
-              const Gap(2),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: AppTheme.accent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
           ],
         ),
       ),

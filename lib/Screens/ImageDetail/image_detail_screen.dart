@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -22,7 +23,7 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
   late Animation<double> _uiOpacity;
   bool _uiVisible = true;
   bool _isFavourite = false;
-  
+
   String _fileSize = '';
   String _fileDate = '';
 
@@ -33,7 +34,7 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
         vsync: this, duration: const Duration(milliseconds: 250));
     _uiOpacity = CurvedAnimation(parent: _uiCtrl, curve: Curves.easeInOut);
     _uiCtrl.value = 1.0;
-    
+
     _loadFileStats();
     _loadFavouriteStatus();
   }
@@ -154,80 +155,120 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
             ),
           ),
 
-          // Bottom bar
+          // Bottom bar panel
           FadeTransition(
             opacity: _uiOpacity,
             child: Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [Colors.black87, Colors.transparent],
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.imageFile?.path.split('/').last ?? 'Photo',
-                      style: GoogleFonts.syne(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+              bottom: 24,
+              left: 20,
+              right: 20,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.2), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        )
+                      ],
                     ),
-                    const Gap(4),
-                    Text(
-                      '$_fileDate  ·  $_fileSize',
-                      style: GoogleFonts.dmSans(
-                          fontSize: 12, color: Colors.white60),
-                    ),
-                    const Gap(16),
-                    Row(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _ActionBtn(
-                            icon: Icons.tune_rounded,
-                            label: 'Edit',
-                            gradient: AppTheme.brandGradient,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              '/editor',
-                              arguments: {'imageFile': widget.imageFile},
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.imageFile?.path.split('/').last ??
+                                        'Photo',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const Gap(4),
+                                  Text(
+                                    '$_fileDate  ·  $_fileSize',
+                                    style: GoogleFonts.dmSans(
+                                        fontSize: 12,
+                                        color: Colors.white.withOpacity(0.7),
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                widget.imageFile?.path
+                                        .split('.')
+                                        .last
+                                        .toUpperCase() ??
+                                    'JPG',
+                                style: GoogleFonts.dmSans(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Gap(10),
-                        Expanded(
-                          child: _ActionBtn(
-                            icon: Icons.auto_awesome_rounded,
-                            label: 'AI Enhance',
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFC77DFF), Color(0xFF7B2FBE)],
+                        const Gap(24),
+                        Row(
+                          children: [
+                            _DetailActionBtn(
+                              icon: Icons.tune_rounded,
+                              label: 'Edit',
+                              color: Colors.white,
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/editor',
+                                arguments: {'imageFile': widget.imageFile},
+                              ),
                             ),
-                            onTap: () => Navigator.pushNamed(context, '/ai'),
-                          ),
-                        ),
-                        const Gap(10),
-                        Expanded(
-                          child: _ActionBtn(
-                            icon: Icons.grid_view_rounded,
-                            label: 'Collage',
-                            gradient: const LinearGradient(
-                              colors: [AppTheme.accentTertiary, Color(0xFF0077B6)],
+                            const Gap(12),
+                            _DetailActionBtn(
+                              icon: Icons.auto_awesome_rounded,
+                              label: 'AI Magic',
+                              color: AppTheme.accent,
+                              onTap: () => Navigator.pushNamed(context, '/ai'),
                             ),
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/collage'),
-                          ),
+                            const Gap(12),
+                            _DetailActionBtn(
+                              icon: Icons.grid_view_rounded,
+                              label: 'Collage',
+                              color: AppTheme.accentSecondary,
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/collage'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -258,28 +299,44 @@ class _ImageDetailScreenState extends State<ImageDetailScreen>
             ),
             const Gap(20),
             ...[
-              (Icons.download_rounded, 'Save a Copy', AppTheme.success, () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copy saved to gallery!')),
-                );
-                Navigator.pop(context);
-              }),
-              (Icons.info_outline_rounded, 'Image Info', AppTheme.text2, () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Path: ${widget.imageFile?.path}')),
-                );
-                Navigator.pop(context);
-              }),
-              (Icons.delete_outline_rounded, 'Delete', Colors.red, () {
-                if (widget.imageFile != null && widget.imageFile!.existsSync()) {
-                  widget.imageFile!.deleteSync();
+              (
+                Icons.download_rounded,
+                'Save a Copy',
+                AppTheme.success,
+                () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Copy saved to gallery!')),
+                  );
+                  Navigator.pop(context);
                 }
-                Navigator.pop(context); // Close sheet
-                Navigator.pop(context); // Close detail screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Image deleted')),
-                );
-              }),
+              ),
+              (
+                Icons.info_outline_rounded,
+                'Image Info',
+                AppTheme.text2,
+                () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Path: ${widget.imageFile?.path}')),
+                  );
+                  Navigator.pop(context);
+                }
+              ),
+              (
+                Icons.delete_outline_rounded,
+                'Delete',
+                Colors.red,
+                () {
+                  if (widget.imageFile != null &&
+                      widget.imageFile!.existsSync()) {
+                    widget.imageFile!.deleteSync();
+                  }
+                  Navigator.pop(context); // Close sheet
+                  Navigator.pop(context); // Close detail screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Image deleted')),
+                  );
+                }
+              ),
             ].map((item) => GestureDetector(
                   onTap: item.$4,
                   child: Container(
@@ -334,37 +391,54 @@ class _CircleBtn extends StatelessWidget {
   }
 }
 
-class _ActionBtn extends StatelessWidget {
+class _DetailActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
-  final LinearGradient gradient;
+  final Color color;
   final VoidCallback onTap;
 
-  const _ActionBtn({
+  const _DetailActionBtn({
     required this.icon,
     required this.label,
-    required this.gradient,
+    required this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-            gradient: gradient, borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const Gap(4),
-            Text(label,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color:
+                color == Colors.white ? Colors.white : color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color:
+                  color == Colors.white ? Colors.white : color.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  color: color == Colors.white ? AppTheme.text1 : color,
+                  size: 20),
+              const Gap(6),
+              Text(
+                label,
                 style: GoogleFonts.dmSans(
-                    fontSize: 11,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500)),
-          ],
+                  fontSize: 10,
+                  color: color == Colors.white ? AppTheme.text1 : color,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
