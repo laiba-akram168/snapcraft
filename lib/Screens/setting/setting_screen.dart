@@ -35,11 +35,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: AppTheme.bg,
       body: Stack(
         children: [
-          // Background
+          // Artistic Background
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
-                gradient: AppTheme.surfaceGradient,
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [Color(0xFFFFFAF8), Color(0xFFFFF0EA)],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -100,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: AppTheme.accent.withOpacity(0.05),
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -193,58 +209,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
+      margin: EdgeInsets.only(
           top: MediaQuery.of(context).padding.top + 12,
           left: 20,
-          right: 20,
-          bottom: 12),
+          right: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        boxShadow: AppTheme.shadowSm,
-        border: Border(bottom: BorderSide(color: AppTheme.border, width: 1)),
+        color: Colors.white.withOpacity(0.75),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
       ),
       child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.border, width: 1),
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded,
+                        color: AppTheme.text1, size: 18),
                   ),
-                  child: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: AppTheme.text1, size: 18),
                 ),
-              ),
-              const Gap(16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Settings',
-                    style: GoogleFonts.syne(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.text1,
+                const Gap(16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Settings',
+                      style: GoogleFonts.syne(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.text1,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Preferences & Account',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      color: AppTheme.text2,
+                    Text(
+                      'Preferences & Account',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11,
+                        color: AppTheme.text2,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -254,37 +282,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSection(
       String title, IconData icon, Color color, List<Widget> children) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: color, size: 15),
+                child: Icon(icon, color: color, size: 16),
               ),
-              const Gap(8),
+              const Gap(10),
               Text(
-                title,
+                title.toUpperCase(),
                 style: GoogleFonts.syne(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.text2),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.text2,
+                    letterSpacing: 1.2),
               ),
             ],
           ),
-          const Gap(10),
+          const Gap(12),
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.border, width: 0.5),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                )
+              ],
+              border: Border.all(color: AppTheme.border, width: 1),
             ),
             child: Column(
               children: children
@@ -296,7 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (e.key < children.length - 1)
                             const Divider(
                                 height: 0,
-                                thickness: 0.5,
+                                thickness: 1,
                                 color: AppTheme.border,
                                 indent: 56),
                         ],
@@ -383,13 +419,20 @@ class _ToggleSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Icon(icon,
-              color: value ? AppTheme.accentSecondary : AppTheme.text3,
-              size: 20),
-          const Gap(14),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: value ? AppTheme.accentSecondary.withOpacity(0.1) : AppTheme.bg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon,
+                color: value ? AppTheme.accentSecondary : AppTheme.text3,
+                size: 20),
+          ),
+          const Gap(16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,13 +440,13 @@ class _ToggleSetting extends StatelessWidget {
                 Text(
                   label,
                   style:
-                      GoogleFonts.dmSans(fontSize: 14, color: AppTheme.text1),
+                      GoogleFonts.dmSans(fontSize: 15, color: AppTheme.text1, fontWeight: FontWeight.w600),
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle!,
                     style:
-                        GoogleFonts.dmSans(fontSize: 11, color: AppTheme.text3),
+                        GoogleFonts.dmSans(fontSize: 11, color: AppTheme.text3, fontWeight: FontWeight.w500),
                   ),
               ],
             ),

@@ -156,105 +156,163 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.surfaceGradient,
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Gap(20),
-                // Avatar with ring
-                ScaleTransition(
-                  scale: _avatarScale,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: _updateAvatar,
-                        child: Container(
-                          width: 100,
-                          height: 100,
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [Color(0xFFFFFAF8), Color(0xFFFFF0EA)],
+                ),
+              ),
+            ),
+            // Decorative Blobs
+            Positioned(
+              top: -100,
+              right: -50,
+              child: Container(
+                width: 250,
+                height: 250,
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Gap(10),
+                  // Avatar with premium ring
+                  ScaleTransition(
+                    scale: _avatarScale,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 110,
+                          height: 110,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: _avatarPath != null 
-                              ? DecorationImage(image: FileImage(File(_avatarPath!)), fit: BoxFit.cover)
-                              : null,
-                            gradient: _avatarPath == null ? AppTheme.brandGradient : null,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.accent.withOpacity(0.3),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                            border: Border.all(color: Colors.white, width: 4),
+                            border: Border.all(color: AppTheme.accent.withOpacity(0.1), width: 1.5),
                           ),
-                          child: _avatarPath == null ? Center(
-                            child: Text(_userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
-                                style: const TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                )),
-                          ) : null,
                         ),
-                      ),
-                      // Edit badge
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
+                        GestureDetector(
                           onTap: _updateAvatar,
                           child: Container(
-                            width: 32,
-                            height: 32,
+                            width: 96,
+                            height: 96,
                             decoration: BoxDecoration(
-                              gradient: AppTheme.brandGradient,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: AppTheme.shadowSm,
+                              image: _avatarPath != null 
+                                ? DecorationImage(image: FileImage(File(_avatarPath!)), fit: BoxFit.cover)
+                                : null,
+                              gradient: _avatarPath == null ? AppTheme.brandGradient : null,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.accent.withOpacity(0.2),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                              border: Border.all(color: Colors.white, width: 4),
                             ),
-                            child: const Icon(Icons.camera_alt_rounded,
-                                color: Colors.white, size: 14),
+                            child: _avatarPath == null ? Center(
+                              child: Text(_userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  )),
+                            ) : null,
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 2,
+                          right: 2,
+                          child: GestureDetector(
+                            onTap: _updateAvatar,
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.brandGradient,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.accent.withOpacity(0.3),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                              ),
+                              child: const Icon(Icons.edit_rounded,
+                                  color: Colors.white, size: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const Gap(16),
-                Text(
-                  _userName,
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-                const Gap(4),
-                Text(
-                  _userEmail,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const Gap(12),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.brandGradient,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: AppTheme.shadowSm,
-                  ),
-                  child: Text(
-                    '✨ PRO MEMBER',
+                  const Gap(16),
+                  Text(
+                    _userName,
                     style: GoogleFonts.syne(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 1),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.text1,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-              ],
+                  const Gap(4),
+                  Text(
+                    _userEmail,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 13,
+                      color: AppTheme.text2,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Gap(16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        )
+                      ],
+                      border: Border.all(color: AppTheme.border, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFD700), size: 16),
+                        const Gap(8),
+                        Text(
+                          'PRO MEMBER',
+                          style: GoogleFonts.syne(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.text1,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -278,35 +336,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     ];
 
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: AppTheme.shadowSm,
-        border: Border.all(color: AppTheme.border, width: 1),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          )
+        ],
+        border: Border.all(color: AppTheme.border, width: 1.5),
       ),
       child: Row(
         children: stats
             .map((s) => Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        s.$2,
-                        style: GoogleFonts.syne(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.text1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: s == stats.last ? null : Border(right: BorderSide(color: AppTheme.border.withOpacity(0.5), width: 1)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          s.$2,
+                          style: GoogleFonts.syne(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.text1,
+                          ),
                         ),
-                      ),
-                      const Gap(6),
-                      Text(
-                        s.$1,
-                        style: GoogleFonts.dmSans(
-                            fontSize: 10, color: AppTheme.text2, height: 1.4, fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                        const Gap(6),
+                        Text(
+                          s.$1,
+                          style: GoogleFonts.dmSans(
+                              fontSize: 10, color: AppTheme.text2, height: 1.2, fontWeight: FontWeight.w700),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ))
             .toList(),
@@ -334,38 +403,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           ),
           const Gap(16),
           SizedBox(
-            height: 100,
+            height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(bottom: 10),
               itemCount: badges.length,
               itemBuilder: (_, i) {
                 final isSpecial = i == 0 || i == 3;
                 return Container(
-                  width: 90,
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.all(12),
+                  width: 100,
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSpecial ? AppTheme.accent.withOpacity(0.05) : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: AppTheme.shadowSm,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      )
+                    ],
                     border: Border.all(
-                      color: isSpecial ? AppTheme.accent.withOpacity(0.2) : AppTheme.border,
-                      width: 1,
+                      color: isSpecial ? AppTheme.accent.withOpacity(0.3) : AppTheme.border,
+                      width: 1.5,
                     ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        badges[i].$1,
-                        style: const TextStyle(fontSize: 24),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isSpecial ? AppTheme.accent.withOpacity(0.1) : AppTheme.bg,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          badges[i].$1,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
-                      const Gap(6),
+                      const Gap(10),
                       Text(
                         badges[i].$2,
                         style: GoogleFonts.dmSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
                           color: AppTheme.text1,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -374,7 +457,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         badges[i].$3,
                         style: GoogleFonts.dmSans(
                           fontSize: 9,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: AppTheme.text2,
                         ),
                       ),
